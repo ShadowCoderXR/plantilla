@@ -19,13 +19,13 @@ class Cliente extends Model
         'administrador_id',
     ];
 
-    public function administrador()
+    public function administradores()
     {
-        return $this->belongsTo(Administrador::class);
+        return $this->belongsToMany(Administrador::class);
     }
 
     public function proveedores()
     {
-        return $this->hasMany(Proveedor::class);
+        return $this->belongsToMany(Proveedor::class);
     }
 }

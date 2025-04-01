@@ -1,0 +1,45 @@
+documento,enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre
+Acta constitutiva,sí,sí,sí,no,sí,sí,no,no,no,sí,sí,sí
+"Datos a corroborar del acta constitutiva: nombre de la empresa, objeto social actual, integración accionaria ",sí,sí,sí,sí,sí,sí,no,no,no,no,sí,sí
+Registro Público de la propiedad y comercio,sí,no,sí,sí,sí,sí,no,no,sí,no,sí,sí
+Poder Notarial del Representante,sí,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí
+Registro Público de la propiedad y comercio,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,no,sí
+Identificación oficial vigente del representante legal,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
+Licencia de uso de suelo ,sí,sí,sí,sí,sí,sí,no,no,sí,sí,no,sí
+Permiso comercial,sí,sí,no,no,sí,sí,no,sí,sí,no,sí,sí
+Comprobante de domicilio oficial vigente no mayor a tres meses ,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+Contrato con la empresa que solicita la revisión ,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
+Curriculum empresarial ,sí,sí,sí,no,no,sí,no,sí,sí,sí,sí,sí
+Reporte especial de crédito emitido por alguna empresa especializada en el ramo.,sí,sí,sí,sí,no,no,sí,sí,sí,sí,no,sí
+Constancia de Situación Fiscal,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+Última declaración anual ,sí,sí,sí,sí,no,sí,sí,no,sí,sí,sí,sí
+Pago de la declaración anual SAT ,sí,sí,sí,sí,sí,sí,no,no,sí,sí,sí,sí
+Declaración pagos provisionales ISR,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
+Pago de la declaración provisional SAT ,sí,sí,sí,no,sí,sí,sí,sí,sí,no,sí,sí
+Declaración mensuales IVA y retenciones,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí,no
+Pago de la declaración mensual SAT ,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
+Última declaración del impuesto sobre nómina,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
+Últimos 2 pagos de nómina ,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
+Opinión de cumplimiento SAT,sí,sí,no,sí,no,sí,sí,sí,no,sí,no,sí
+Balanza de comprobación ,sí,sí,sí,sí,sí,no,no,no,sí,sí,no,sí
+Balance general,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+Estado de resultados,sí,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
+Integración de activos fijos y desglose de depreciación,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
+Conciliación bancaria ,sí,no,sí,no,sí,sí,no,sí,no,sí,sí,sí
+Auxiliar de ventas con la empresa que solicita la revisión ,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+Integración de cuentas deudoras y acreedoras ,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+Registro patronal IMSS,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
+Últimos 2 pagos de cuotas obrero patronales ,sí,no,sí,no,sí,sí,sí,sí,sí,no,sí,sí
+Expedientes de los trabajadores,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+Opinión de cumplimiento IMSS,no,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
+Opinión de cumplimiento INFONAVIT,no,no,sí,sí,sí,sí,sí,sí,no,sí,no,sí
+Registro REPSE ,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+Reporte especial de incidencias legales emitido por alguna empresa especializada en el ramo,sí,no,sí,no,sí,no,no,sí,sí,sí,sí,sí
+Anexos de incidencias legales,sí,no,sí,sí,sí,no,sí,sí,sí,no,sí,sí
+Resultado VP360° empresa/persona física evaluada,sí,sí,sí,sí,sí,sí,no,sí,sí,no,sí,sí
+Soporte documental ,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
+Resultado VP360° socios,no,no,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+Soporte documental ,sí,no,no,sí,sí,no,sí,no,sí,sí,sí,sí
+Resultado VP360° representante legal,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no
+Soporte documental,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
+Notas periodísticas,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí

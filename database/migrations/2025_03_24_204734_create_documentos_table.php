@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('documentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
-            $table->foreignId('tipo_documento_id')->constrained('tipos_documento')->onDelete('cascade');
-            $table->tinyInteger('mes')->unsigned();
-            $table->smallInteger('anio')->unsigned();
-            $table->string('archivo')->nullable();
-            $table->enum('estado', ['1', '2', '3', '4'])->default('4');
+            $table->foreignId('grupo_documento_id')->constrained('grupos_documentos')->cascadeOnDelete();
+            $table->string('nombre');
+            $table->string('informacion')->nullable();
             $table->timestamps();
         });
     }

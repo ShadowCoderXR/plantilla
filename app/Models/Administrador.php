@@ -20,7 +20,7 @@ class Administrador extends Model
 
     public function clientes()
     {
-        return $this->hasMany(Cliente::class);
+        return $this->belongsToMany(Cliente::class);
     }
 
     public function getNumeroClientesAttribute()

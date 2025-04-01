@@ -2,22 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\Administrador;
+use App\Models\GrupoDocumento;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 
-class AdministradorSeeder extends Seeder
+class GrupoDocumentoSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $path = database_path('data/administradores.csv');
+        $path = database_path('data/grupos_documentos.csv');
 
         if (!File::exists($path)) {
-            $this->command->error("No se encontró el archivo administradores.csv en database/data");
+            $this->command->error("No se encontró el archivo documentos.csv en database/data");
             return;
         }
 
@@ -43,7 +43,7 @@ class AdministradorSeeder extends Seeder
 
             $nombres[] = $data['nombre'];
 
-            Administrador::updateOrCreate(
+            GrupoDocumento::updateOrCreate(
                 ['nombre' => $data['nombre']],
                 $data
             );
@@ -51,6 +51,6 @@ class AdministradorSeeder extends Seeder
 
         fclose($file);
 
-        Administrador::whereNotIn('nombre', $nombres)->delete();
+        GrupoDocumento::whereNotIn('nombre', $nombres)->delete();
     }
 }

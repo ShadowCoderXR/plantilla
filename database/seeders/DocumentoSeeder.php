@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Documento;
-use App\Models\DocumentoRequerido;
-use App\Models\Proveedor;
+use App\Models\GrupoDocumento;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class DocumentoSeeder extends Seeder
 {
@@ -15,35 +15,54 @@ class DocumentoSeeder extends Seeder
      */
     public function run(): void
     {
-        $proveedores = Proveedor::all();
-        $documentosValidos = [];
+        $path = database_path('data/documentos.csv');
 
-        $años = range(2021, 2025);
+        if (!File::exists($path)) {
+            $this->command->error("No se encontró el archivo documentos.csv en database/data");
+            return;
+        }
 
-        foreach ($años as $anio) {
-            for ($mes = 1; $mes <= 12; $mes++) {
-                foreach ($proveedores as $proveedor) {
-                    $documentosRequeridos = DocumentoRequerido::where('mes', $mes)->pluck('tipo_documento_id')->toArray();
+        $file = fopen($path, 'r');
+        $headers = fgetcsv($file);
+        $nombres = [];
 
-                    $todosLosDocumentos = DocumentoRequerido::distinct()->pluck('tipo_documento_id')->toArray();
+        while (($row = fgetcsv($file)) !== false) {
+            $data = [];
 
-                    foreach ($todosLosDocumentos as $tipoDocumentoId) {
-                        $estado = in_array($tipoDocumentoId, $documentosRequeridos) ? '2' : '4';
+            foreach ($headers as $index => $header) {
+                $key = trim($header);
+                $value = isset($row[$index]) ? trim(preg_replace('/\xC2\xA0|\s+/u', ' ', $row[$index])) : null;
 
-                        $documento = Documento::updateOrCreate(
-                            [
-                                'proveedor_id' => $proveedor->id,
-                                'tipo_documento_id' => $tipoDocumentoId,
-                                'mes' => $mes,
-                                'anio' => $anio,
-                            ],
-                            [
-                                'estado' => $estado,
-                            ]
-                        );
-                    }
+                if ($value !== null && $value !== '') {
+                    $data[$key] = $value;
                 }
             }
+
+            if (!isset($data['nombre']) || !isset($data['grupo'])) {
+                continue;
+            }
+
+            $grupo = GrupoDocumento::where('nombre', $data['grupo'])->first();
+            if (!$grupo) {
+                $this->command->warn("Grupo no encontrado: {$data['grupo']}");
+                continue;
+            }
+
+            $documentoData = [
+                'grupo_documento_id' => $grupo->id,
+                'informacion' => $data['informacion'] ?? null,
+            ];
+
+            $nombres[] = $data['nombre'];
+
+            Documento::updateOrCreate(
+                ['nombre' => $data['nombre']],
+                $documentoData
+            );
         }
+
+        fclose($file);
+
+        Documento::whereNotIn('nombre', $nombres)->delete();
     }
 }

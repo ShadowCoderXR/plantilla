@@ -20,20 +20,20 @@
                     <div class="col-md-8 d-flex align-items-center">
                         <div class="card-body">
                             <h5 class="mb-0">{{ $administrador->nombre }}</h5>
-                            <p class="text-sm mb-3 text-muted">{{ $administrador->descrpcion }}</p>
+                            <p class="text-sm mb-3 text-muted">{{ $administrador->descripcion }}</p>
                             <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6>
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex align-items-center">
                                     <i class="fas fa-phone-alt me-2 text-primary"></i>
-                                    <span class="fw-bold">Teléfono:</span> {{ $administrador->telefono }}
+                                    <span class="fw-bold">Teléfono:</span>&nbsp;{{ $administrador->telefono }}
                                 </li>
                                 <li class="list-group-item d-flex align-items-center">
                                     <i class="fas fa-envelope me-2 text-danger"></i>
-                                    <span class="fw-bold">Correo:</span> {{ $administrador->correo }}
+                                    <span class="fw-bold">Correo:</span>&nbsp;{{ $administrador->correo }}
                                 </li>
                                 <li class="list-group-item d-flex align-items-center">
                                     <i class="fas fa-calendar-alt me-2 text-success"></i>
-                                    <span class="fw-bold">Fecha de Registro:</span> {{ $administrador->created_at->format('d/m/Y') }}
+                                    <span class="fw-bold">Fecha de Registro:</span>&nbsp;{{ $administrador->created_at->format('d/m/Y') }}
                                 </li>
                             </ul>
                         </div>
@@ -44,16 +44,91 @@
 
         <!-- Card Descripción Adicional -->
         <div class="col-md-6 d-flex mb-4">
-            <div class="card p-3 w-100 d-flex flex-column">
-                <div class="card-body flex-grow-1">
-                    <h5 class="mb-3">Descripción Adicional</h5>
-                    <p class="text-muted">
+            <div class="card w-100 d-flex flex-column h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-sm mb-2">Descripción Adicional</h6>
+                    <p class="text-muted mb-0" style="font-size: 15px;">
                         {{ $administrador->descripcion_adicional }}
                     </p>
+                </div>
+
+                <hr class="horizontal dark my-0">
+
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
+                        <label for="infoTipo" class="text-muted small mb-0">
+                            Selecciona los documentos a descargar:
+                        </label>
+
+                        <select id="infoTipo"
+                                class="form-select form-select-sm w-auto"
+                                style="min-width: 180px;">
+                            <option value="1">Todos los documentos</option>
+                            <option value="2">Documentos por Año</option>
+                            <option value="3">Documentos por Mes</option>
+                        </select>
+
+                        <!-- Cambiamos la clase del botón -->
+                        <a class="btn btn-sm bg-gradient-primary btnDescargarDocumentos mb-0"
+                           href="#"
+                           style="white-space: nowrap;">
+                            <i class="fa fa-download me-2"></i> Descargar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para el primer caso (modalSeleccion) -->
+        <div class="modal fade" id="modalSeleccion" tabindex="-1" aria-labelledby="modalSeleccionLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow-lg rounded-3">
+                    <div class="modal-header">
+                        <h6 class="modal-title d-flex align-items-center gap-2 text-dark fw-bold" id="modalSeleccionLabel">
+                            <i class="fa fa-info-circle fa-lg text-dark" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></i>
+                            Confirmar Descarga
+                        </h6>
+                        <button type="button" class="btn p-0 border-0 bg-transparent ms-auto" data-bs-dismiss="modal"
+                                aria-label="Cerrar" style="box-shadow: none;">
+                            <i class="fa fa-times fa-lg text-secondary"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body pt-2 pb-2 px-3">
+                        <p id="mensajeConfirmacion" class="text-center text-secondary small my-3">
+                            Se descargarán los documentos de todos los clientes y proveedores del periodo seleccionado.
+                        </p>
+                        <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
+                            @csrf
+                            <div id="grupoMes" class="mb-3" style="display: none;">
+                                <label for="mesSeleccionado" class="form-label text-sm">Mes</label>
+                                <select id="mesSeleccionado" class="form-select rounded-2 shadow-sm">
+                                    @foreach(range(1, 12) as $mes)
+                                        <option value="{{ $mes }}">{{ \Carbon\Carbon::create()->month($mes)->translatedFormat('F') }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div id="grupoAnio" class="mb-3" style="display: none;">
+                                <label for="anioSeleccionado" class="form-label text-sm">Año</label>
+                                <select id="anioSeleccionado" class="form-select rounded-2 shadow-sm">
+                                    @foreach ($anios as $anio)
+                                        <option value="{{ $anio }}">{{ $anio }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn bg-gradient-primary w-100 rounded-2 shadow-sm" data-bs-dismiss="modal">
+                                    <i class="fa fa-check me-2"></i> Confirmar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Card Clientes -->
     <div class="row">
@@ -68,32 +143,31 @@
                     <div class="card-body pt-0" id="clients-container">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="d-flex">
-                                <img class="width-48-px" src="{{ asset( $cliente->logo ) }}">
+                                <img src="{{ asset( $cliente->logo ) }}" alt="{{ $cliente->nombre }}" class="img-fluid rounded-circle object-fit-contain"
+                                     style="width: 48px; height: 48px;">
                                 <div class="my-auto ms-3">
                                     <a href="{{ route('admin.cliente', ['id' => $cliente->id]) }}"><h5 class="mb-0">{{ $cliente->nombre }}</h5></a>
                                     <p class="text-sm text-muted mb-1">{{ $cliente->descripcion }}</p>
                                 </div>
                             </div>
-                            <a href="#" class="text-sm text-body toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
+                            <a href="#" class="text-sm toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
                         </div>
                         <div class="ps-5 pt-3 ms-3 providers-list" style="display: none;">
                             <h6 class="text-uppercase text-sm mb-3">Proveedores</h6>
                             @forelse($cliente->proveedores as $proveedor)
                                 <div class="d-sm-flex bg-gray-100 border-radius-lg p-2 my-4">
-                                    <img class="width-48-px" src="{{ asset($proveedor->logo) }}">
+                                    <img src="{{ asset($proveedor->logo) }}" alt="{{ $proveedor->nombre }}" class="img-fluid rounded-circle object-fit-contain"
+                                         style="width: 48px; height: 48px;">
                                     <div class="ms-3">
                                         <h6 class="mb-0">{{ $proveedor->nombre }}</h6>
                                         <p class="mb-0 text-sm">{{ $proveedor->descripcion }}</p>
                                     </div>
                                     <div class="ms-auto d-flex align-items-center">
-                                        <select class="form-select form-select-sm me-2 yearSelector" style="width: auto; min-width: 80px;">
-                                            <option value="2025">2025</option>
-                                            <option value="2024">2024</option>
-                                            <option value="2023">2023</option>
-                                            <option value="2022">2022</option>
-                                            <option value="2021">2021</option>
-                                        </select>
-                                        <a href="{{ route('admin.proveedor', ['id' => $proveedor->id, 'año' => '2024']) }}" class="btn btn-sm bg-gradient-primary my-sm-auto mt-2 mb-0">Documentos</a>
+                                        <!-- Cambiamos la clase del botón -->
+                                        <a href="#" class="btn btn-sm bg-gradient-primary btnProveedorDocumentos mb-0"
+                                           data-proveedor-id="{{ $proveedor->id }}">
+                                            Documentos
+                                        </a>
                                     </div>
                                 </div>
                             @empty
@@ -107,6 +181,32 @@
                         <p class="text-muted">No hay clientes registrados.</p>
                     </div>
                 @endforelse
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDocumentos" tabindex="-1" aria-labelledby="modalDocumentosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg rounded-3">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="modalDocumentosLabel">Selecciona Año</h6>
+                    <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <i class="fa fa-times fa-lg text-secondary"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formDocumentos">
+                        <div class="mb-3">
+                            <label for="modalAnioSelector" class="form-label">Año</label>
+                            <select id="modalAnioSelector" class="form-select">
+                                @foreach($anios as $anio)
+                                    <option value="{{ $anio }}">{{ $anio }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Confirmar</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -128,6 +228,75 @@
                             : "Ver menos <i class='fas fa-chevron-up text-xs ms-1'></i>";
                     }
                 });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".yearSelector").forEach((selector) => {
+                selector.addEventListener("change", function () {
+                    const selectedYear = this.value;
+                    const documentosLink = this.parentElement.querySelector(".documentosLink");
+                    const proveedorId = documentosLink.getAttribute("data-proveedor-id");
+
+                    documentosLink.href = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__']) }}"
+                        .replace('__ID__', proveedorId)
+                        .replace('__YEAR__', selectedYear);
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tipoSelect = document.getElementById("infoTipo");
+            const btnDescargar = document.querySelector(".btnDescargarDocumentos");
+
+            const modalSeleccion = new bootstrap.Modal(document.getElementById("modalSeleccion"));
+            const grupoMes = document.getElementById("grupoMes");
+            const grupoAnio = document.getElementById("grupoAnio");
+
+            btnDescargar.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                grupoMes.style.display = "none";
+                grupoAnio.style.display = "none";
+
+                const tipo = tipoSelect.value;
+                if (tipo === "2") {
+                    grupoAnio.style.display = "block";
+                }
+                if (tipo === "3") {
+                    grupoMes.style.display = "block";
+                    grupoAnio.style.display = "block";
+                }
+
+                modalSeleccion.show();
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let proveedorId = null;
+            const modalDocumentos = new bootstrap.Modal(document.getElementById("modalDocumentos"));
+            const formDocumentos = document.getElementById("formDocumentos");
+
+            document.querySelectorAll(".btnProveedorDocumentos").forEach(button => {
+                button.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    proveedorId = this.getAttribute("data-proveedor-id");
+                    modalDocumentos.show();
+                });
+            });
+
+            formDocumentos.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const selectedYear = document.getElementById("modalAnioSelector").value;
+                const urlTemplate = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__']) }}";
+                const url = urlTemplate.replace('__ID__', proveedorId).replace('__YEAR__', selectedYear);
+                window.location.href = url;
             });
         });
     </script>

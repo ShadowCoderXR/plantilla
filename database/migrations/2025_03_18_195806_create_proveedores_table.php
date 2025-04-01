@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('proveedores', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('descripcion');
-            $table->string('logo');
-            $table->string('small_logo');
-            $table->string('color');
-            $table->string('telefono');
-            $table->string('correo');
-            $table->text('descripcion_adicional');
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->string('nombre')->unique();
+            $table->string('descripcion')->default('Sin descripción');
+            $table->string('logo')->default('img/logos/default.webp');
+            $table->string('small_logo')->default('img/small-logos/default.webp');
+            $table->string('color')->default('#000000');
+            $table->string('telefono')->default('Sin datos');
+            $table->string('correo')->default('Sin datos');
+            $table->text('descripcion_adicional')->default('Sin descripción adicional');
             $table->timestamps();
         });
     }

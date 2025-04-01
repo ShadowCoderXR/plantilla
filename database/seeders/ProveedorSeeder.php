@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cliente;
 use App\Models\Proveedor;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ProveedorSeeder extends Seeder
 {
@@ -13,102 +16,81 @@ class ProveedorSeeder extends Seeder
      */
     public function run(): void
     {
-        $proveedores = [
-            [
-                'nombre' => 'Google',
-                'descripcion' => 'Motor de búsqueda',
-                'logo' => 'img/logos/google.png',
-                'small_logo' => 'img/small-logos/google.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contactp@google.com',
-                'descripcion_adicional' => 'Google es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 1,
-            ],
-            [
-                'nombre' => 'Jira',
-                'descripcion' => 'Gestión de proyectos',
-                'logo' => 'img/logos/jira.png',
-                'small_logo' => 'img/small-logos/jira.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@jira.com',
-                'descripcion_adicional' => 'Jira es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 1,
-            ],
-            [
-                'nombre' => 'Adobe XD',
-                'descripcion' => 'Diseño de interfaces',
-                'logo' => 'img/logos/adobe-xd.png',
-                'small_logo' => 'img/small-logos/adobe-xd.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@adobe.com',
-                'descripcion_adicional' => 'Adobe XD es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 2,
-            ],
-            [
-                'nombre' => 'InVision',
-                'descripcion' => 'Prototipado',
-                'logo' => 'img/logos/invision.png',
-                'small_logo' => 'img/small-logos/invision.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@invision.com',
-                'descripcion_adicional' => 'InVision es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 2,
-            ],
-            [
-                'nombre' => 'Jira',
-                'descripcion' => 'Gestión de proyectos',
-                'logo' => 'img/logos/jira.png',
-                'small_logo' => 'img/small-logos/jira.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@jira.com',
-                'descripcion_adicional' => 'Jira es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 2,
-            ],
-            [
-                'nombre' => 'Asana',
-                'descripcion' => 'Gestión de proyectos',
-                'logo' => 'img/logos/asana.png',
-                'small_logo' => 'img/small-logos/asana.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@asana.com',
-                'descripcion_adicional' => 'Asana es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 3,
-            ],
-            [
-                'nombre' => 'Spotify',
-                'descripcion' => 'Streaming de música',
-                'logo' => 'img/logos/spotify.png',
-                'small_logo' => 'img/small-logos/spotify.png',
-                'color' => '#1a1a1a',
-                'telefono' => '1234567890',
-                'correo' => 'contacto@spotify.com',
-                'descripcion_adicional' => 'Spotify es una empresa de tecnología que se dedica a la innovación y desarrollo de soluciones tecnológicas para empresas y emprendedores.'
-                    . PHP_EOL . PHP_EOL . 'Nuestro objetivo es brindar soluciones tecnológicas que permitan a nuestros clientes mejorar sus procesos y aumentar su productividad.',
-                'cliente_id' => 4,
-            ],
-        ];
+        $path = database_path('data/proveedores.csv');
 
-        $nombres = array_column($proveedores, 'nombre');
-
-        foreach ($proveedores as $proveedor) {
-            Proveedor::updateOrCreate(
-                ['nombre' => $proveedor['nombre']],
-                $proveedor
-            );
+        if (!File::exists($path)) {
+            $this->command->error("No se encontró el archivo proveedores.csv en database/data");
+            return;
         }
 
-        Proveedor::whereNotIn('nombre', $nombres)->delete();
+        $file = fopen($path, 'r');
+        $headers = fgetcsv($file);
+
+        $proveedoresEnCsv = [];
+        $relacionesEnCsv = [];
+        $procesados = [];
+
+        while (($row = fgetcsv($file)) !== false) {
+            $data = [];
+
+            foreach ($headers as $index => $header) {
+                $key = trim($header);
+                $value = isset($row[$index]) ? trim(preg_replace('/\xC2\xA0|\s+/u', ' ', $row[$index])) : null;
+
+                if ($value !== null && $value !== '') {
+                    $data[$key] = $value;
+                }
+            }
+
+            if (!isset($data['nombre']) || !isset($data['cliente'])) {
+                continue;
+            }
+
+            $cliente = Cliente::where('nombre', $data['cliente'])->first();
+            if (!$cliente) {
+                $this->command->warn("Cliente no encontrado: {$data['cliente']}");
+                continue;
+            }
+
+            $proveedorData = $data;
+            unset($proveedorData['cliente']);
+
+            if (!in_array($data['nombre'], $procesados)) {
+                $proveedor = Proveedor::updateOrCreate(
+                    ['nombre' => $data['nombre']],
+                    $proveedorData
+                );
+                $procesados[] = $data['nombre'];
+            } else {
+                $proveedor = Proveedor::where('nombre', $data['nombre'])->first();
+            }
+
+
+            $proveedoresEnCsv[] = $proveedor->nombre;
+            $relacionesEnCsv[] = ['proveedor_id' => $proveedor->id, 'cliente_id' => $cliente->id];
+
+            $proveedor->clientes()->syncWithoutDetaching([
+                $cliente->id => ['created_at' => now(), 'updated_at' => now()]
+            ]);
+        }
+
+        fclose($file);
+
+        Proveedor::whereNotIn('nombre', $proveedoresEnCsv)->delete();
+
+        $todos = DB::table('cliente_proveedor')->get();
+
+        foreach ($todos as $relacion) {
+            $existe = collect($relacionesEnCsv)->contains(function ($rel) use ($relacion) {
+                return $rel['proveedor_id'] == $relacion->proveedor_id && $rel['cliente_id'] == $relacion->cliente_id;
+            });
+
+            if (!$existe) {
+                DB::table('cliente_proveedor')
+                    ->where('proveedor_id', $relacion->proveedor_id)
+                    ->where('cliente_id', $relacion->cliente_id)
+                    ->delete();
+            }
+        }
     }
 }

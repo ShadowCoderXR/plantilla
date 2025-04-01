@@ -68,24 +68,6 @@
                                             <span class="sidenav-normal"> Proveedor </span>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.documento') && request()->route('status') == 1 ? 'active' : '' }}" href="{{ route('admin.documento', 1) }}">
-                                            <span class="sidenav-mini-icon text-xs"> DP </span>
-                                            <span class="sidenav-normal"> Documento presente </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.documento') && request()->route('status') == 2 ? 'active' : '' }}" href="{{ route('admin.documento', 2) }}">
-                                            <span class="sidenav-mini-icon text-xs"> DC </span>
-                                            <span class="sidenav-normal"> Documento cargando </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.documento') && request()->route('status') == 3 ? 'active' : '' }}" href="{{ route('admin.documento', 3) }}">
-                                            <span class="sidenav-mini-icon text-xs"> DF </span>
-                                            <span class="sidenav-normal"> Documento faltante </span>
-                                        </a>
-                                    </li>
                                 </ul>
                             </div>
                         </li>

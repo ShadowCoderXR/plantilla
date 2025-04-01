@@ -42,7 +42,7 @@
                             <div class="card-body p-3">
                                 <div class="d-flex">
                                     <div class="avatar avatar-xl border-radius-md p-2" style="background-color: {{ $administrador->color }};">
-                                        <img src="{{ asset( $administrador['small-logo'] ) }}" alt="...">
+                                        <img src="{{ asset( $administrador['small_logo'] ) }}" alt="...">
                                     </div>
                                     <div class="ms-3 my-auto">
                                         <h6>{{ $administrador->nombre }}</h6>

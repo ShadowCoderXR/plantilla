@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documentos_requeridos', function (Blueprint $table) {
+        Schema::create('cliente_proveedor', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tipo_documento_id')->constrained('tipos_documento');
-            $table->tinyInteger('mes')->unsigned();
+            $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
+            $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['cliente_id', 'proveedor_id']);
         });
     }
 
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documentos_requeridos');
+        Schema::dropIfExists('cliente_proveedor');
     }
 };

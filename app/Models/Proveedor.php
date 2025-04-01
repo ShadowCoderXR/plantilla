@@ -19,13 +19,8 @@ class Proveedor extends Model
         'cliente_id',
     ];
 
-    public function cliente()
+    public function clientes()
     {
-        return $this->belongsTo(Cliente::class);
-    }
-
-    public function documentos()
-    {
-        return $this->hasMany(Documento::class);
+        return $this->belongsToMany(Cliente::class);
     }
 }
