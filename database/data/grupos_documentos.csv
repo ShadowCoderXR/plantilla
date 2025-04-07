@@ -1,9 +1,6 @@
-nombre,descripcion
-CORPORATIVA,Documentos de constitución y estructura legal
-FISCAL,Comprobantes fiscales y situación ante el SAT
-CONTABLE,Reportes financieros y balances
-SEGURIDAD SOCIAL,"IMSS, INFONAVIT y cumplimiento social"
-INCIDENCIAS LEGALES,Procesos legales y litigios
-REVISIÓN DE LISTAS NEGRAS,Verificación de antecedentes
-REPUTACIONAL,Evaluación de riesgo e imagen pública
-REPORTE DE EVALUACIÓN,
+tipo,nombre,descripcion
+Evaluaciones Empresariales,CORPORATIVA,Documentos de constitución y estructura legal
+Evaluaciones Empresariales,FISCAL,Comprobantes fiscales y situación ante el SAT
+Evaluaciones Empresariales,CONTABLE,Reportes financieros y balances
+Evaluaciones Empresariales,SEGURIDAD SOCIAL,"IMSS, INFONAVIT y cumplimiento social"
+REPSE,REPSE,

@@ -17,4 +17,9 @@ class GrupoDocumento extends Model
     {
         return $this->hasMany(Documento::class, 'grupo_documento_id');
     }
+
+    public function tipoDocumento()
+    {
+        return $this->belongsTo(TipoDocumento::class, 'tipo_documento_id');
+    }
 }

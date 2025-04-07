@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\GrupoDocumento;
+use App\Models\TipoDocumento;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -37,15 +38,26 @@ class GrupoDocumentoSeeder extends Seeder
                 }
             }
 
-            if (!isset($data['nombre'])) {
+            if (!isset($data['nombre']) || !isset($data['tipo'])) {
                 continue;
             }
+
+            $tipo = TipoDocumento::where('nombre', $data['tipo'])->first();
+            if (!$tipo) {
+                $this->command->warn("Tipo no encontrado: {$data['tipo']}");
+                continue;
+            }
+
+            $grupoData = [
+                'tipo_documento_id' => $tipo->id,
+                'descripcion' => $data['descripcion'] ?? null,
+            ];
 
             $nombres[] = $data['nombre'];
 
             GrupoDocumento::updateOrCreate(
                 ['nombre' => $data['nombre']],
-                $data
+                $grupoData
             );
         }
 

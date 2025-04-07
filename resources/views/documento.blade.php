@@ -5,19 +5,10 @@
 
 @push('styles')
     <style>
-        .dropzone.dz-max-files-reached {
-            pointer-events: none;
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .dropzone.dz-max-files-reached .dz-remove {
-            pointer-events: auto;
-            cursor: pointer;
-            opacity: 1;
+        .badge.bg-warning {
+            background: #FBB03C !important;
         }
     </style>
-
 @endpush
 
 @section('content')
@@ -40,8 +31,16 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                     <span class="fw-bold d-block">Nombre del Documento</span>
-                                    <span class="text-muted">{{$documentoProveedor->documento->nombre}}</span>
+                                    <span class="text-muted">{{ $documentoProveedor->documento->nombre}}</span>
                                 </li>
+
+
+                                @if($documentoProveedor->documento->informacion && $documentoProveedor->documento->informacion != 'Documento única vez')
+                                    <li class="list-group-item">
+                                        <span class="fw-bold d-block">Información</span>
+                                        <span class="text-muted">{{ $documentoProveedor->documento->informacion }}</span>
+                                    </li>
+                                @endif
                                 <li class="list-group-item">
                                     <span class="fw-bold d-block">Estatus</span>
                                     @if ($documentoProveedor->estado == 'cargado')
@@ -57,13 +56,7 @@
                                 <li class="list-group-item">
                                     <span class="fw-bold d-block">Fecha de Carga</span>
                                     <span class="text-muted">
-                                        {{ $documentoProveedor->updated_at ? $documentoProveedor->updated_at->translatedFormat('d \d\e F \d\e Y h:i A') : 'No cargado' }}
-                                    </span>
-                                </li>
-                                <li class="list-group-item">
-                                    <span class="fw-bold d-block">Ruta de Archivo</span>
-                                    <span class="text-muted">
-                                        {{ $documentoProveedor->ruta ?? 'No cargado' }}
+                                        {{ $documentoProveedor->fecha_carga ? \Carbon\Carbon::parse($documentoProveedor->fecha_carga)->translatedFormat('d \d\e F \d\e Y h:i A') : 'No cargado' }}
                                     </span>
                                 </li>
                             </ul>
@@ -72,10 +65,10 @@
                         @if($documentoProveedor->estado == 'cargado' && $documentoProveedor->ruta)
                             <!-- Botón de Descarga -->
                             <div class="col-lg-4 col-12 d-flex align-items-center justify-content-center">
-                                <a class="btn btn-outline-primary w-100 w-lg-auto text-center"
-                                   href="{{ route('admin.documento.descargar', $documentoProveedor->id) }}"
-                                   style="height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 18px;">
-                                    <i class="fa fa-download me-2"></i> Descargar Documento
+                                <a class="btn btn-outline-primary w-100 w-lg-auto text-center text-sm"
+                                   href="{{ route('admin.documento.descargar', [$documentoProveedor->id, $unicaVez]) }}"
+                                   style="height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 18px;">
+                                    <i class="fa fa-download me-2"></i> Descargar Documento(s)
                                 </a>
                             </div>
                         @endif
@@ -92,7 +85,7 @@
                                 </h6>
                                 <!-- Formulario Dropzone -->
                                 <form
-                                    action="{{ route('admin.documento.guardar', $documentoProveedor->id) }}"
+                                    action="{{ route('admin.documento.guardar', [$documentoProveedor->id, $unicaVez]) }}"
                                     class="form-control dropzone"
                                     enctype="multipart/form-data"
                                     id="productImg"
@@ -102,7 +95,7 @@
 
                                 <!-- Botón de envío -->
                                 <button id="uploadButton" class="btn btn-outline-primary mt-3 float-end">
-                                    <i class="fa fa-upload me-2"></i> Enviar Documento
+                                    <i class="fa fa-upload me-2"></i> Subir archivo(s)
                                 </button>
                             </div>
                        @endif
@@ -117,49 +110,47 @@
         <script>
             Dropzone.autoDiscover = false;
 
-            var productImg = new Dropzone("#productImg", {
-                url: "{{ route('admin.documento.guardar', $documentoProveedor->id) }}",
+            let productImg = new Dropzone("#productImg", {
+                url: "{{ route('admin.documento.guardar', [$documentoProveedor->id, $unicaVez]) }}",
                 headers: {
                     'X-CSRF-TOKEN': "{{ csrf_token() }}"
                 },
-                acceptedFiles: ".pdf,.xlsx,.xls,.zip,.rar",
+                acceptedFiles: ".pdf,.xlsx,.xls,.sue",
                 addRemoveLinks: true,
                 dictRemoveFile: "Eliminar",
                 autoProcessQueue: false,
-                uploadMultiple: false,
+                uploadMultiple: false,            
                 parallelUploads: 1,
-                maxFiles: 1,
-                dictDefaultMessage: "Arrastra aquí el documento o haz clic para subirlo",
-                dictInvalidFileType: "Solo se permiten archivos PDF, XLSX, XLS, ZIP y RAR",
-                dictMaxFilesExceeded: "Solo puedes subir un archivo",
+                maxFiles: 1000,
+                maxFilesize: 4096,
+                timeout: 0,
+                dictDefaultMessage: "Clic para elegir los archivos a cargar",
+                dictInvalidFileType: "Solo se permiten archivos PDF, XLSX, XLS, y SUE",
+                dictMaxFilesExceeded: "Solo puedes subir 1000 archivos",
+            });
 
-                init: function () {
-                    var myDropzone = this;
-
-                    this.on("addedfile", function (file) {
-                        if (this.files.length > 1) {
-                            this.removeFile(this.files[0]);
-                        }
-                    });
-
-                    document.getElementById("uploadButton").addEventListener("click", function () {
-                        if (myDropzone.files.length === 0) {
-                            alert("Por favor, sube un archivo antes de enviar.");
-                        } else {
-                            myDropzone.processQueue();
-                        }
-                    });
-
-                    this.on("success", function (file, response) {
-                        alert("Documento subido correctamente");
-                        location.reload();
-                    });
-
-                    this.on("error", function (file, response) {
-                        alert("Hubo un error al subir el archivo: " + response);
-                        this.removeFile(file);
-                    });
+            document.getElementById("uploadButton").addEventListener("click", function () {
+                if (productImg.files.length === 0) {
+                    alert("Por favor, sube un archivo antes de enviar.");
+                } else {
+                    productImg.processQueue();
                 }
             });
+
+            productImg.on("success", function(file) {
+                productImg.removeFile(file);
+
+                if (productImg.getQueuedFiles().length > 0) {
+                    productImg.processQueue();
+                } else {
+                    alert('Los archivos han sido cargados con éxito.');
+                }
+            });
+
+            productImg.on("error", function (file, response) {
+                alert("Hubo un error al subir el archivo: " + response);
+                //productImg.removeFile(file);
+            });
+
         </script>
     @endpush

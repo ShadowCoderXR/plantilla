@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documentos', function (Blueprint $table) {
+        Schema::create('tipos_documentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('grupo_documento_id')->constrained('grupos_documentos')->cascadeOnDelete();
-            $table->string('nombre');
-            $table->string('informacion')->nullable();
+            $table->string('nombre')->unique();
             $table->timestamps();
-
-            $table->unique(['nombre', 'grupo_documento_id']);
         });
     }
 
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documentos');
+        Schema::dropIfExists('tipos_documentos');
     }
 };

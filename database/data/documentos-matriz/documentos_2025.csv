@@ -1,45 +1,52 @@
-documento,enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre
-Acta constitutiva,sí,sí,sí,no,sí,sí,no,no,no,sí,sí,sí
-"Datos a corroborar del acta constitutiva: nombre de la empresa, objeto social actual, integración accionaria ",sí,sí,sí,sí,sí,sí,no,no,no,no,sí,sí
-Registro Público de la propiedad y comercio,sí,no,sí,sí,sí,sí,no,no,sí,no,sí,sí
-Poder Notarial del Representante,sí,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí
-Registro Público de la propiedad y comercio,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,no,sí
-Identificación oficial vigente del representante legal,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
-Licencia de uso de suelo ,sí,sí,sí,sí,sí,sí,no,no,sí,sí,no,sí
-Permiso comercial,sí,sí,no,no,sí,sí,no,sí,sí,no,sí,sí
-Comprobante de domicilio oficial vigente no mayor a tres meses ,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
-Contrato con la empresa que solicita la revisión ,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
-Curriculum empresarial ,sí,sí,sí,no,no,sí,no,sí,sí,sí,sí,sí
-Reporte especial de crédito emitido por alguna empresa especializada en el ramo.,sí,sí,sí,sí,no,no,sí,sí,sí,sí,no,sí
-Constancia de Situación Fiscal,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
-Última declaración anual ,sí,sí,sí,sí,no,sí,sí,no,sí,sí,sí,sí
-Pago de la declaración anual SAT ,sí,sí,sí,sí,sí,sí,no,no,sí,sí,sí,sí
-Declaración pagos provisionales ISR,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
-Pago de la declaración provisional SAT ,sí,sí,sí,no,sí,sí,sí,sí,sí,no,sí,sí
-Declaración mensuales IVA y retenciones,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí,no
-Pago de la declaración mensual SAT ,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
-Última declaración del impuesto sobre nómina,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
-Últimos 2 pagos de nómina ,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
-Opinión de cumplimiento SAT,sí,sí,no,sí,no,sí,sí,sí,no,sí,no,sí
-Balanza de comprobación ,sí,sí,sí,sí,sí,no,no,no,sí,sí,no,sí
-Balance general,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
-Estado de resultados,sí,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
-Integración de activos fijos y desglose de depreciación,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
-Conciliación bancaria ,sí,no,sí,no,sí,sí,no,sí,no,sí,sí,sí
-Auxiliar de ventas con la empresa que solicita la revisión ,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
-Integración de cuentas deudoras y acreedoras ,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
-Registro patronal IMSS,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
-Últimos 2 pagos de cuotas obrero patronales ,sí,no,sí,no,sí,sí,sí,sí,sí,no,sí,sí
-Expedientes de los trabajadores,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
-Opinión de cumplimiento IMSS,no,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
-Opinión de cumplimiento INFONAVIT,no,no,sí,sí,sí,sí,sí,sí,no,sí,no,sí
-Registro REPSE ,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
-Reporte especial de incidencias legales emitido por alguna empresa especializada en el ramo,sí,no,sí,no,sí,no,no,sí,sí,sí,sí,sí
-Anexos de incidencias legales,sí,no,sí,sí,sí,no,sí,sí,sí,no,sí,sí
-Resultado VP360° empresa/persona física evaluada,sí,sí,sí,sí,sí,sí,no,sí,sí,no,sí,sí
-Soporte documental ,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
-Resultado VP360° socios,no,no,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
-Soporte documental ,sí,no,no,sí,sí,no,sí,no,sí,sí,sí,sí
-Resultado VP360° representante legal,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no
-Soporte documental,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
-Notas periodísticas,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+grupo,documento,enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre
+CORPORATIVA,Acta constitutiva,sí,sí,sí,no,sí,sí,no,no,no,sí,sí,sí
+CORPORATIVA,Poder Notarial,sí,sí,sí,sí,sí,sí,no,no,no,no,sí,sí
+CORPORATIVA,Indentificación oficial vigente del representante legal,sí,no,sí,sí,sí,sí,no,no,sí,no,sí,sí
+CORPORATIVA,Licencia de uso de suelo o comercial ,sí,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí
+CORPORATIVA,Comprobante de domicilio de la dirección oficial vigente,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,no,sí
+CORPORATIVA,Contrato con la empresa que solicita la revisión,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
+CORPORATIVA,Curriculum empresarial,sí,sí,sí,sí,sí,sí,no,no,sí,sí,no,sí
+CORPORATIVA,Buró de crédito,sí,sí,no,no,sí,sí,no,sí,sí,no,sí,sí
+CORPORATIVA,Buró Legal,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+CONTABLE,Constancia de Situación Fiscal,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
+CONTABLE,Última declaración anual y pago correspondiente,sí,sí,sí,no,no,sí,no,sí,sí,sí,sí,sí
+CONTABLE,Constancias de pagos provisionales,sí,sí,sí,sí,no,no,sí,sí,sí,sí,no,sí
+CONTABLE,Constancias de pagos provisionales ISR,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+CONTABLE,Constancias de pagos mensuales IVA,sí,sí,sí,sí,no,sí,sí,no,sí,sí,sí,sí
+CONTABLE,Constancias de pagos mensuales Retenciones ISR,sí,sí,sí,sí,sí,sí,no,no,sí,sí,sí,sí
+CONTABLE,Constancias de pagos mensuales Retenciones IVA,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
+CONTABLE,Última declaración del impuesto sobre nómina,sí,sí,sí,no,sí,sí,sí,sí,sí,no,sí,sí
+CONTABLE,Últimos 2 pagos de nómina,sí,no,sí,no,sí,sí,sí,sí,sí,sí,sí,no
+CONTABLE,Opinión de cumplimiento SAT,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
+SEGURIDAD SOCIAL,Registro Patronal IMSS,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
+SEGURIDAD SOCIAL,Últimos 2 pagos de cuotas obrero patronales,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
+SEGURIDAD SOCIAL,Expedientes de los trabajadores,sí,sí,no,sí,no,sí,sí,sí,no,sí,no,sí
+SEGURIDAD SOCIAL,Opnión de cumplimiento IMSS,sí,sí,sí,sí,sí,no,no,no,sí,sí,no,sí
+SEGURIDAD SOCIAL,Opnión de cumplimiento INFONAVIT,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+SEGURIDAD SOCIAL,Registro REPSE,sí,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Certificado REPSE,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí
+REPSE,Acta Constitutiva,sí,no,sí,no,sí,sí,no,sí,no,sí,sí,sí
+REPSE,Contrato de Servicios Especializados,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Constancia de Situación Fiscal,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Registro Patronal,sí,sí,sí,sí,sí,sí,sí,no,sí,sí,sí,sí
+REPSE,Opinión de Cumplimiento SAT,sí,no,sí,no,sí,sí,sí,sí,sí,no,sí,sí
+REPSE,Opinión de Cumplimiento IMSS,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Opinión de Cumplimiento INFONAVIT,no,sí,sí,sí,sí,sí,no,sí,sí,sí,sí,sí
+REPSE,CFDI de Nómina,no,no,sí,sí,sí,sí,sí,sí,no,sí,no,sí
+REPSE,Lista de Empleados,sí,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí
+REPSE,Archivos SUA o SIPARE,sí,no,sí,no,sí,no,no,sí,sí,sí,sí,sí
+REPSE,IMSS Mensual,sí,no,sí,sí,sí,no,sí,sí,sí,no,sí,sí
+REPSE,IMSS Bimestral,sí,sí,sí,sí,sí,sí,no,sí,sí,no,sí,sí
+REPSE,CFDI IMSS,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
+REPSE,CFDI INFONAVIT,no,no,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Comprobante de Pago IMSS/INFONAVIT,sí,no,no,sí,sí,no,sí,no,sí,sí,sí,sí
+REPSE,Declaraciones Mensuales Retenciones ISR,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no
+REPSE,Acuse - ISR,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago SAT - ISR,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago Bancario - ISR,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Declaraciones Mensuales Retenciones IVA,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Acuse - IVA,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago SAT - IVA,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago Bancario - IVA,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Declaración Informativa de Contratos de Servicios u Obras Especializadas,sí,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí
+REPSE,Declaración Sistema de Información de Subcontratación,sí,sí,sí,no,sí,sí,sí,sí,sí,sí,sí,sí

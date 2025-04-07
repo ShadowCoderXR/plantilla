@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('grupos_documentos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('tipo_documento_id')->constrained('tipos_documentos')->cascadeOnDelete();
             $table->string('nombre')->unique();
             $table->string('descripcion')->nullable();
             $table->timestamps();

@@ -1,46 +1,52 @@
 grupo,nombre,informacion
-CORPORATIVA,Acta constitutiva,"Carátula, Objeto social, Capital social, Integración accionaria"
-CORPORATIVA,"Datos a corroborar del acta constitutiva: nombre de la empresa, objeto social actual, integración accionaria ",Mensaje
-CORPORATIVA,Registro Público de la propiedad y comercio,
-CORPORATIVA,Poder Notarial del Representante,
-CORPORATIVA,Registro Público de la propiedad y comercio,
-CORPORATIVA,Identificación oficial vigente del representante legal,"INE, Pasaporte, FM3, Cédula Profesional"
-CORPORATIVA,Licencia de uso de suelo ,"Luz, telefono, agua, internet"
-CORPORATIVA,Permiso comercial,
-CORPORATIVA,Comprobante de domicilio oficial vigente no mayor a tres meses ,
-CORPORATIVA,Contrato con la empresa que solicita la revisión ,En su caso
-CORPORATIVA,Curriculum empresarial ,"áreas de especialidad, principales proyectos en los que ha participado y principales clientes, en los últimos dos años"
-CORPORATIVA,Reporte especial de crédito emitido por alguna empresa especializada en el ramo.,
-FISCAL,Constancia de Situación Fiscal,
-FISCAL,Última declaración anual ,3 años
-FISCAL,Pago de la declaración anual SAT ,"En su caso, opcional, 3 años"
-FISCAL,Declaración pagos provisionales ISR,últimas 3 del periodo actual
-FISCAL,Pago de la declaración provisional SAT ,"En su caso, Opcional, últimas 3 del periodo actual"
-FISCAL,Declaración mensuales IVA y retenciones,últimas 3 del periodo actual
-FISCAL,Pago de la declaración mensual SAT ,"En su caso, Opcional, últimas 3 del periodo actual"
-FISCAL,Última declaración del impuesto sobre nómina,
-FISCAL,Últimos 2 pagos de nómina ,"CFDI de nómina, rar, zip"
-FISCAL,Opinión de cumplimiento SAT,
-CONTABLE,Balanza de comprobación ,"mensuales en Excel, de los últimos 3 ejercicios"
-CONTABLE,Balance general,de los últimos 4 ejercicios
-CONTABLE,Estado de resultados,de los últimos 4 ejercicios
-CONTABLE,Integración de activos fijos y desglose de depreciación,último ejercicio
-CONTABLE,Conciliación bancaria ,último ejercicio
-CONTABLE,Auxiliar de ventas con la empresa que solicita la revisión ,"último ejercicio, opcional"
-CONTABLE,Integración de cuentas deudoras y acreedoras ,"último ejercicio, excel"
-SEGURIDAD SOCIAL,Registro patronal IMSS,
-SEGURIDAD SOCIAL,Últimos 2 pagos de cuotas obrero patronales ,últimos 2 bimestres
-SEGURIDAD SOCIAL,Expedientes de los trabajadores,dos ejemplos en un rar
-SEGURIDAD SOCIAL,Opinión de cumplimiento IMSS,
-SEGURIDAD SOCIAL,Opinión de cumplimiento INFONAVIT,
-SEGURIDAD SOCIAL,Registro REPSE ,opcional
-INCIDENCIAS LEGALES,Reporte especial de incidencias legales emitido por alguna empresa especializada en el ramo,
-INCIDENCIAS LEGALES,Anexos de incidencias legales,
-REVISIÓN DE LISTAS NEGRAS,Resultado VP360° empresa/persona física evaluada,
-REVISIÓN DE LISTAS NEGRAS,Soporte documental ,"opcional, rar/zip"
-REVISIÓN DE LISTAS NEGRAS,Resultado VP360° socios,rar/zip
-REVISIÓN DE LISTAS NEGRAS,Soporte documental ,"opcional, rar/zip"
-REVISIÓN DE LISTAS NEGRAS,Resultado VP360° representante legal,
-REVISIÓN DE LISTAS NEGRAS,Soporte documental,"opcional, rar/zip"
-REPUTACIONAL,Notas periodísticas,rar/zip
-REPORTE DE EVALUACIÓN,,
+CORPORATIVA,Acta constitutiva,Incluye registro público
+CORPORATIVA,Poder Notarial,
+CORPORATIVA,Indentificación oficial vigente del representante legal,
+CORPORATIVA,Licencia de uso de suelo o comercial ,Permisos
+CORPORATIVA,Comprobante de domicilio de la dirección oficial vigente,
+CORPORATIVA,Contrato con la empresa que solicita la revisión,
+CORPORATIVA,Curriculum empresarial,
+CORPORATIVA,Buró de crédito,
+CORPORATIVA,Buró Legal,
+CONTABLE,Constancia de Situación Fiscal,
+CONTABLE,Última declaración anual y pago correspondiente,
+CONTABLE,Constancias de pagos provisionales,Cada declaración se divide en 4 documentos
+CONTABLE,Constancias de pagos provisionales ISR,"Acuse, Detalle, Pago SAT y Pago Bancario"
+CONTABLE,Constancias de pagos mensuales IVA,"Acuse, Detalle, Pago SAT, Pago Bancario"
+CONTABLE,Constancias de pagos mensuales Retenciones ISR,"Acuse, Detalle, Pago SAT, Pago Bancario"
+CONTABLE,Constancias de pagos mensuales Retenciones IVA,"Acuse, Detalle, Pago SAT, Pago Bancario"
+CONTABLE,Última declaración del impuesto sobre nómina,Declaración y Pago
+CONTABLE,Últimos 2 pagos de nómina,
+CONTABLE,Opinión de cumplimiento SAT,
+SEGURIDAD SOCIAL,Registro Patronal IMSS,
+SEGURIDAD SOCIAL,Últimos 2 pagos de cuotas obrero patronales,
+SEGURIDAD SOCIAL,Expedientes de los trabajadores,
+SEGURIDAD SOCIAL,Opnión de cumplimiento IMSS,
+SEGURIDAD SOCIAL,Opnión de cumplimiento INFONAVIT,
+SEGURIDAD SOCIAL,Registro REPSE,
+REPSE,Certificado REPSE,Documento única vez
+REPSE,Acta Constitutiva,Documento única vez
+REPSE,Contrato de Servicios Especializados,
+REPSE,Constancia de Situación Fiscal,Documento única vez
+REPSE,Registro Patronal,Documento única vez
+REPSE,Opinión de Cumplimiento SAT,
+REPSE,Opinión de Cumplimiento IMSS,
+REPSE,Opinión de Cumplimiento INFONAVIT,
+REPSE,CFDI de Nómina,
+REPSE,Lista de Empleados,Los cuales formaron parte del servicio especializado
+REPSE,Archivos SUA o SIPARE,
+REPSE,IMSS Mensual,EMA
+REPSE,IMSS Bimestral,EBA
+REPSE,CFDI IMSS,
+REPSE,CFDI INFONAVIT,
+REPSE,Comprobante de Pago IMSS/INFONAVIT,
+REPSE,Declaraciones Mensuales Retenciones ISR,
+REPSE,Acuse - ISR,
+REPSE,Pago SAT - ISR,
+REPSE,Pago Bancario - ISR,
+REPSE,Declaraciones Mensuales Retenciones IVA,
+REPSE,Acuse - IVA,
+REPSE,Pago SAT - IVA,
+REPSE,Pago Bancario - IVA,
+REPSE,Declaración Informativa de Contratos de Servicios u Obras Especializadas,ICSOE
+REPSE,Declaración Sistema de Información de Subcontratación,SISUB

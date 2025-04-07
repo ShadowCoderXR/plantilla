@@ -7,297 +7,308 @@
 @endpush
 
 @section('content')
-    <div class="row">
-        <!-- Card Información de la Empresa -->
-        <div class="col-md-6 d-flex mb-4">
-            <div class="card p-3 w-100 d-flex flex-column">
-                <div class="row g-0 align-items-center flex-column flex-md-row text-center text-md-start flex-grow-1">
-                    <div class="col-md-4 d-flex justify-content-center">
-                        <div style="width: 250px; height: 250px; overflow: hidden; border-radius: 10px;">
-                            <img alt="vp360" class="border-radius-lg shadow-sm img-fluid" src="{{ asset($administrador->logo) }}" style="width: 100%; height: 100%; object-fit: contain;">
-                        </div>
+<div class="row">
+    <!-- Card Información de la Empresa -->
+    <div class="col-md-6 d-flex mb-4">
+        <div class="card p-0 w-100 d-flex flex-column">
+            <div class="row g-0 align-items-center flex-column flex-md-row text-center text-md-start flex-grow-1">
+                <div class="col-md-4 d-flex justify-content-center">
+                    <div style="/*width: 250px; height: 250px;*/ overflow: hidden; border-radius: 10px;">
+                        <img alt="" class="img-fluid" src="{{ asset('img/favicon.ico') }}" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
-                    <div class="col-md-8 d-flex align-items-center">
-                        <div class="card-body">
-                            <h5 class="mb-0">{{ $administrador->nombre }}</h5>
-                            <p class="text-sm mb-3 text-muted">{{ $administrador->descripcion }}</p>
-                            <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex align-items-center">
-                                    <i class="fas fa-phone-alt me-2 text-primary"></i>
-                                    <span class="fw-bold">Teléfono:</span>&nbsp;{{ $administrador->telefono }}
-                                </li>
-                                <li class="list-group-item d-flex align-items-center">
-                                    <i class="fas fa-envelope me-2 text-danger"></i>
-                                    <span class="fw-bold">Correo:</span>&nbsp;{{ $administrador->correo }}
-                                </li>
-                                <li class="list-group-item d-flex align-items-center">
-                                    <i class="fas fa-calendar-alt me-2 text-success"></i>
-                                    <span class="fw-bold">Fecha de Registro:</span>&nbsp;{{ $administrador->created_at->format('d/m/Y') }}
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+                <div class="col-md-8 d-flex align-items-center">
+                    <div class="card-body">
+                        <h5 class="mb-0">{{ $administrador->nombre }}</h5>
+                        <p class="text-sm mb-1">{{ $administrador->descripcion }}</p>
+                        <!-- <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6> -->
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex align-items-center ps-0">
+                                <i class="fas fa-phone-alt me-2 text-primary"></i>
+                                <span class="fw-bold">Teléfono:</span>&nbsp;{{ $administrador->telefono }}
+                            </li>
+                            <li class="list-group-item d-flex align-items-center ps-0">
+                                <i class="fas fa-envelope me-2 text-danger"></i>
+                                <span class="fw-bold">Correo:</span>&nbsp;{{ $administrador->correo }}
+                            </li>
+                            <li class="list-group-item d-flex align-items-center ps-0">
+                                <i class="fas fa-calendar-alt me-2 text-success"></i>
+                                <span class="fw-bold">Fecha de Registro:</span>&nbsp;{{ $administrador->created_at->format('d/m/Y') }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Card Descripción Adicional -->
-        <div class="col-md-6 d-flex mb-4">
-            <div class="card w-100 d-flex flex-column h-100">
-                <div class="card-body">
-                    <h6 class="text-uppercase text-sm mb-2">Descripción Adicional</h6>
-                    <p class="text-muted mb-0" style="font-size: 15px;">
-                        {{ $administrador->descripcion_adicional }}
-                    </p>
-                </div>
+    <!-- Card Descripción Adicional -->
+    <div class="col-md-6 d-flex mb-4">
+        <div class="card w-100 d-flex flex-column h-100">
+            <div class="card-body">
+                <h5 class="text-uppercase mb-2">Descripción Adicional</h5>
+                <p class="text-muted mb-0" style="font-size: 15px;">
+                    {{ $administrador->descripcion_adicional }}
+                </p>
+            </div>
 
-                <hr class="horizontal dark my-0">
+            <hr class="horizontal dark my-0">
 
-                <div class="card-footer bg-white border-0">
-                    <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
+            <div class="card-footer bg-white border-0">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
                         <label for="infoTipo" class="text-muted small mb-0">
                             Selecciona los documentos a descargar:
                         </label>
-
+                    </div>
+                    <div class="col-md-4">
                         <select id="infoTipo"
-                                class="form-select form-select-sm w-auto"
-                                style="min-width: 180px;">
+                            class="form-select form-select-sm w-auto"
+                            style="min-width: 180px;">
                             <option value="1">Todos los documentos</option>
                             <option value="2">Documentos por Año</option>
                             <option value="3">Documentos por Mes</option>
                         </select>
-
+                    </div>
+                    <div class="col-md-6">
                         <!-- Cambiamos la clase del botón -->
                         <a class="btn btn-sm bg-gradient-primary btnDescargarDocumentos mb-0"
-                           href="#"
-                           style="white-space: nowrap;">
+                            href="#"
+                            style="white-space: nowrap;">
                             <i class="fa fa-download me-2"></i> Descargar
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Modal para el primer caso (modalSeleccion) -->
-        <div class="modal fade" id="modalSeleccion" tabindex="-1" aria-labelledby="modalSeleccionLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content border-0 shadow-lg rounded-3">
-                    <div class="modal-header">
-                        <h6 class="modal-title d-flex align-items-center gap-2 text-dark fw-bold" id="modalSeleccionLabel">
-                            <i class="fa fa-info-circle fa-lg text-dark" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></i>
-                            Confirmar Descarga
-                        </h6>
-                        <button type="button" class="btn p-0 border-0 bg-transparent ms-auto" data-bs-dismiss="modal"
-                                aria-label="Cerrar" style="box-shadow: none;">
-                            <i class="fa fa-times fa-lg text-secondary"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body pt-2 pb-2 px-3">
-                        <p id="mensajeConfirmacion" class="text-center text-secondary small my-3">
-                            Se descargarán los documentos de todos los clientes y proveedores del periodo seleccionado.
-                        </p>
-                        <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
-                            @csrf
-                            <div id="grupoMes" class="mb-3" style="display: none;">
-                                <label for="mesSeleccionado" class="form-label text-sm">Mes</label>
-                                <select id="mesSeleccionado" class="form-select rounded-2 shadow-sm">
-                                    @foreach(range(1, 12) as $mes)
-                                        <option value="{{ $mes }}">{{ \Carbon\Carbon::create()->month($mes)->translatedFormat('F') }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div id="grupoAnio" class="mb-3" style="display: none;">
-                                <label for="anioSeleccionado" class="form-label text-sm">Año</label>
-                                <select id="anioSeleccionado" class="form-select rounded-2 shadow-sm">
-                                    @foreach ($anios as $anio)
-                                        <option value="{{ $anio }}">{{ $anio }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="submit" class="btn bg-gradient-primary w-100 rounded-2 shadow-sm" data-bs-dismiss="modal">
-                                    <i class="fa fa-check me-2"></i> Confirmar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </div>
 
-
-    <!-- Card Clientes -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card" id="clientes">
-                <div class="card-header">
-                    <h5>Clientes</h5>
-                    <p class="text-sm">Listado de clientes registrados en el sistema</p>
-                </div>
-
-                @forelse($administrador->clientes as $cliente)
-                    <div class="card-body pt-0" id="clients-container">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="d-flex">
-                                <img src="{{ asset( $cliente->logo ) }}" alt="{{ $cliente->nombre }}" class="img-fluid rounded-circle object-fit-contain"
-                                     style="width: 48px; height: 48px;">
-                                <div class="my-auto ms-3">
-                                    <a href="{{ route('admin.cliente', ['id' => $cliente->id]) }}"><h5 class="mb-0">{{ $cliente->nombre }}</h5></a>
-                                    <p class="text-sm text-muted mb-1">{{ $cliente->descripcion }}</p>
-                                </div>
-                            </div>
-                            <a href="#" class="text-sm toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
-                        </div>
-                        <div class="ps-5 pt-3 ms-3 providers-list" style="display: none;">
-                            <h6 class="text-uppercase text-sm mb-3">Proveedores</h6>
-                            @forelse($cliente->proveedores as $proveedor)
-                                <div class="d-sm-flex bg-gray-100 border-radius-lg p-2 my-4">
-                                    <img src="{{ asset($proveedor->logo) }}" alt="{{ $proveedor->nombre }}" class="img-fluid rounded-circle object-fit-contain"
-                                         style="width: 48px; height: 48px;">
-                                    <div class="ms-3">
-                                        <h6 class="mb-0">{{ $proveedor->nombre }}</h6>
-                                        <p class="mb-0 text-sm">{{ $proveedor->descripcion }}</p>
-                                    </div>
-                                    <div class="ms-auto d-flex align-items-center">
-                                        <!-- Cambiamos la clase del botón -->
-                                        <a href="#" class="btn btn-sm bg-gradient-primary btnProveedorDocumentos mb-0"
-                                           data-proveedor-id="{{ $proveedor->id }}">
-                                            Documentos
-                                        </a>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-muted">No hay proveedores registrados para este cliente.</p>
-                            @endforelse
-                        </div>
-                        <hr class="horizontal dark">
-                    </div>
-                @empty
-                    <div class="text-center p-4">
-                        <p class="text-muted">No hay clientes registrados.</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalDocumentos" tabindex="-1" aria-labelledby="modalDocumentosLabel" aria-hidden="true">
+    <!-- Modal para el primer caso (modalSeleccion) -->
+    <div class="modal fade" id="modalSeleccion" tabindex="-1" aria-labelledby="modalSeleccionLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0 shadow-lg rounded-3">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="modalDocumentosLabel">Selecciona Año</h6>
-                    <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <h6 class="modal-title d-flex align-items-center gap-2 text-dark fw-bold" id="modalSeleccionLabel">
+                        <i class="fa fa-info-circle fa-lg text-dark" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></i>
+                        Confirmar Descarga
+                    </h6>
+                    <button type="button" class="btn p-0 border-0 bg-transparent ms-auto" data-bs-dismiss="modal"
+                        aria-label="Cerrar" style="box-shadow: none;">
                         <i class="fa fa-times fa-lg text-secondary"></i>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form id="formDocumentos">
-                        <div class="mb-3">
-                            <label for="modalAnioSelector" class="form-label">Año</label>
-                            <select id="modalAnioSelector" class="form-select">
-                                @foreach($anios as $anio)
-                                    <option value="{{ $anio }}">{{ $anio }}</option>
+                <div class="modal-body pt-2 pb-2 px-3">
+                    <p id="mensajeConfirmacion" class="text-center text-secondary small my-3">
+                        Se descargarán los documentos de todos los clientes y proveedores del periodo seleccionado.
+                    </p>
+                    <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
+                        @csrf
+                        <div id="grupoMes" class="mb-3" style="display: none;">
+                            <label for="mesSeleccionado" class="form-label text-sm">Mes</label>
+                            <select id="mesSeleccionado" class="form-select rounded-2 shadow-sm">
+                                @foreach(range(1, 12) as $mes)
+                                <option value="{{ $mes }}">{{ \Carbon\Carbon::create()->month($mes)->translatedFormat('F') }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Confirmar</button>
+
+                        <div id="grupoAnio" class="mb-3" style="display: none;">
+                            <label for="anioSeleccionado" class="form-label text-sm">Año</label>
+                            <select id="anioSeleccionado" class="form-select rounded-2 shadow-sm">
+                                @foreach ($anios as $anio)
+                                <option value="{{ $anio }}">{{ $anio }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn bg-gradient-primary w-100 rounded-2 shadow-sm" data-bs-dismiss="modal">
+                                <i class="fa fa-check me-2"></i> Confirmar
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+
+<!-- Card Clientes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card" id="clientes">
+            <div class="card-header">
+                <h5>Clientes</h5>
+                <p class="text-sm">Listado de clientes registrados en el sistema</p>
+            </div>
+
+            @forelse($administrador->clientes as $cliente)
+            <div class="card-body pt-0 pb-0" id="clients-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex">
+                        <img src="{{ asset( $cliente->logo ) }}" alt="{{ $cliente->nombre }}" class="img-fluid rounded-circle object-fit-contain"
+                            style="width: 48px; height: 48px;">
+                        <div class="my-auto ms-3">
+                            <a href="{{ route('admin.cliente', ['id' => $cliente->id]) }}">
+                                <h5 class="mb-0 text-sm">{{ $cliente->nombre }}</h5>
+                            </a>
+                        </div>
+                    </div>
+                    <a href="#" class="text-sm toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
+                </div>
+                <div class="ps-5 pt-3 ms-3 providers-list" style="display: none;">
+                    <h6 class="text-uppercase text-sm mb-3">Proveedores</h6>
+                    @forelse($cliente->proveedores as $proveedor)
+                    <div class="d-sm-flex bg-gray-100 border-radius-lg p-2 my-4">
+                        <img src="{{ asset($proveedor->logo) }}" alt="{{ $proveedor->nombre }}" class="img-fluid rounded-circle object-fit-contain"
+                            style="width: 48px; height: 48px;">
+                        <div class="ms-3 m-auto">
+                            <h6 class="mb-0 text-sm">{{ $proveedor->nombre }}</h6>
+                        </div>
+                        <div class="ms-auto d-flex align-items-center">
+                            <a href="#" class="btn btn-sm bg-gradient-primary btnProveedorDocumentos mb-0"
+                                data-proveedor-id="{{ $proveedor->id }}">
+                                Documentos
+                            </a>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-muted">No hay proveedores registrados para este cliente.</p>
+                    @endforelse
+                </div>
+                <hr class="horizontal dark">
+            </div>
+            @empty
+            <div class="text-center p-4">
+                <p class="text-muted">No hay clientes registrados.</p>
+            </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDocumentos" tabindex="-1" aria-labelledby="modalDocumentosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header">
+                <h6 class="modal-title d-flex align-items-center gap-2 text-dark fw-bold" id="modalDocumentosLabel">
+                    <i class="fa fa-folder-open fa-lg text-dark" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></i>
+                    Selecciona Año
+                </h6>
+                <button type="button" class="btn p-0 border-0 bg-transparent ms-auto" data-bs-dismiss="modal" aria-label="Cerrar" style="box-shadow: none;">
+                    <i class="fa fa-times fa-lg text-secondary"></i>
+                </button>
+            </div>
+            <div class="modal-body pt-2 pb-2 px-3">
+                <form id="formDocumentos">
+                    <input type="hidden" id="inputProveedorId" name="id"> <!-- 👈 Aquí va el proveedor_id -->
+
+                    <div class="mb-3">
+                        <label for="modalAnioSelector" class="form-label text-sm">Año</label>
+                        <select id="modalAnioSelector" class="form-select rounded-2 shadow-sm">
+                            @foreach($anios as $anio)
+                            <option value="{{ $anio }}">{{ $anio }}</option>
+                            @endforeach
+                        </select>
+
+                        <label for="modalTipoDocumentoSelector" class="form-label text-sm mt-3">Tipo de Documento</label>
+                        <select id="modalTipoDocumentoSelector" class="form-select rounded-2 shadow-sm">
+                            @foreach($tiposDocumentos as $tipo)
+                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn bg-gradient-primary w-100 rounded-2 shadow-sm">
+                            <i class="fa fa-check me-2"></i> Confirmar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
-    <!-- Script para mostrar/ocultar los proveedores de un cliente -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".toggle-providers").forEach(button => {
-                button.addEventListener("click", function (event) {
-                    event.preventDefault();
-                    let providersList = this.parentElement.nextElementSibling;
-                    if (providersList && providersList.classList.contains("providers-list")) {
-                        let isVisible = providersList.style.display === "block";
-                        providersList.style.display = isVisible ? "none" : "block";
-                        this.innerHTML = isVisible
-                            ? "Ver más <i class='fas fa-chevron-down text-xs ms-1'></i>"
-                            : "Ver menos <i class='fas fa-chevron-up text-xs ms-1'></i>";
-                    }
-                });
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".yearSelector").forEach((selector) => {
-                selector.addEventListener("change", function () {
-                    const selectedYear = this.value;
-                    const documentosLink = this.parentElement.querySelector(".documentosLink");
-                    const proveedorId = documentosLink.getAttribute("data-proveedor-id");
-
-                    documentosLink.href = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__']) }}"
-                        .replace('__ID__', proveedorId)
-                        .replace('__YEAR__', selectedYear);
-                });
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const tipoSelect = document.getElementById("infoTipo");
-            const btnDescargar = document.querySelector(".btnDescargarDocumentos");
-
-            const modalSeleccion = new bootstrap.Modal(document.getElementById("modalSeleccion"));
-            const grupoMes = document.getElementById("grupoMes");
-            const grupoAnio = document.getElementById("grupoAnio");
-
-            btnDescargar.addEventListener("click", function (e) {
-                e.preventDefault();
-
-                grupoMes.style.display = "none";
-                grupoAnio.style.display = "none";
-
-                const tipo = tipoSelect.value;
-                if (tipo === "2") {
-                    grupoAnio.style.display = "block";
+<!-- Script para mostrar/ocultar los proveedores de un cliente -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".toggle-providers").forEach(button => {
+            button.addEventListener("click", function(event) {
+                event.preventDefault();
+                let providersList = this.parentElement.nextElementSibling;
+                if (providersList && providersList.classList.contains("providers-list")) {
+                    let isVisible = providersList.style.display === "block";
+                    providersList.style.display = isVisible ? "none" : "block";
+                    this.innerHTML = isVisible ?
+                        "Ver más <i class='fas fa-chevron-down text-xs ms-1'></i>" :
+                        "Ver menos <i class='fas fa-chevron-up text-xs ms-1'></i>";
                 }
-                if (tipo === "3") {
-                    grupoMes.style.display = "block";
-                    grupoAnio.style.display = "block";
-                }
-
-                modalSeleccion.show();
             });
         });
-    </script>
+    });
+</script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let proveedorId = null;
-            const modalDocumentos = new bootstrap.Modal(document.getElementById("modalDocumentos"));
-            const formDocumentos = document.getElementById("formDocumentos");
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".btnProveedorDocumentos").forEach(btn => {
+            btn.addEventListener("click", function() {
+                const proveedorId = this.getAttribute("data-proveedor-id");
+                document.getElementById("inputProveedorId").value = proveedorId;
 
-            document.querySelectorAll(".btnProveedorDocumentos").forEach(button => {
-                button.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    proveedorId = this.getAttribute("data-proveedor-id");
-                    modalDocumentos.show();
-                });
-            });
-
-            formDocumentos.addEventListener("submit", function(e) {
-                e.preventDefault();
-                const selectedYear = document.getElementById("modalAnioSelector").value;
-                const urlTemplate = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__']) }}";
-                const url = urlTemplate.replace('__ID__', proveedorId).replace('__YEAR__', selectedYear);
-                window.location.href = url;
+                const modal = new bootstrap.Modal(document.getElementById("modalDocumentos"));
+                modal.show();
             });
         });
-    </script>
+
+        const form = document.getElementById("formDocumentos");
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const proveedorId = document.getElementById("inputProveedorId").value;
+            const anio = document.getElementById("modalAnioSelector").value;
+            const tipo = document.getElementById("modalTipoDocumentoSelector").value;
+
+            const url = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}"
+                .replace('__ID__', proveedorId)
+                .replace('__YEAR__', anio)
+                .replace('__TIPO__', tipo);
+
+            window.location.href = url;
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tipoSelect = document.getElementById("infoTipo");
+        const btnDescargar = document.querySelector(".btnDescargarDocumentos");
+
+        const modalSeleccion = new bootstrap.Modal(document.getElementById("modalSeleccion"));
+        const grupoMes = document.getElementById("grupoMes");
+        const grupoAnio = document.getElementById("grupoAnio");
+
+        btnDescargar.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            grupoMes.style.display = "none";
+            grupoAnio.style.display = "none";
+
+            const tipo = tipoSelect.value;
+            if (tipo === "2") {
+                grupoAnio.style.display = "block";
+            }
+            if (tipo === "3") {
+                grupoMes.style.display = "block";
+                grupoAnio.style.display = "block";
+            }
+
+            modalSeleccion.show();
+        });
+    });
+</script>
 @endpush

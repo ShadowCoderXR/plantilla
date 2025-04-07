@@ -24,7 +24,7 @@ class DocumentoSeeder extends Seeder
 
         $file = fopen($path, 'r');
         $headers = fgetcsv($file);
-        $nombres = [];
+        $documentos = [];
 
         while (($row = fgetcsv($file)) !== false) {
             $data = [];
@@ -48,21 +48,33 @@ class DocumentoSeeder extends Seeder
                 continue;
             }
 
-            $documentoData = [
-                'grupo_documento_id' => $grupo->id,
-                'informacion' => $data['informacion'] ?? null,
+            $documentos[] = [
+                'nombre' => $data['nombre'],
+                'grupo_documento_id' => $grupo->id
             ];
 
-            $nombres[] = $data['nombre'];
-
             Documento::updateOrCreate(
-                ['nombre' => $data['nombre']],
-                $documentoData
+                [
+                    'nombre' => $data['nombre'],
+                    'grupo_documento_id' => $grupo->id,
+                ],
+                [
+                    'informacion' => $data['informacion'] ?? null,
+                ]
             );
         }
 
         fclose($file);
 
-        Documento::whereNotIn('nombre', $nombres)->delete();
+        Documento::query()->each(function ($doc) use ($documentos) {
+            $existe = collect($documentos)->first(function ($item) use ($doc) {
+                return $item['nombre'] === $doc->nombre
+                    && (int) $item['grupo_documento_id'] === (int) $doc->grupo_documento_id;
+            });
+
+            if (!$existe) {
+                $doc->delete();
+            }
+        });
     }
 }

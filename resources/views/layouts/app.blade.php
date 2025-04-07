@@ -21,6 +21,7 @@
         <link href="{{ asset('css/nucleo-svg.css') }}" rel="stylesheet"/>
         <!-- CSS Files -->
         <link href="{{ asset('css/soft-ui-dashboard.css?v=1.1.1') }}" id="pagestyle" rel="stylesheet"/>
+        <style></style>
     </head>
 
     <!-- Body -->
@@ -46,9 +47,6 @@
                 @include('partials.footer')
             </div>
         </main>
-
-        <!--   config   -->
-        @include('partials.config')
 
         <!--   Core JS Files   -->
         <script src="{{ asset('js/core/popper.min.js') }}"></script>

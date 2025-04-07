@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdministradorSeeder::class,
             ClienteSeeder::class,
             ProveedorSeeder::class,
+            TipoDocumentoSeeder::class,
             GrupoDocumentoSeeder::class,
             DocumentoSeeder::class,
             DocumentoMatrizSeeder::class,

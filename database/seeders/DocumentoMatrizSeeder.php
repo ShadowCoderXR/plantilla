@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Documento;
 use App\Models\DocumentoMatriz;
+use App\Models\GrupoDocumento;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -50,13 +51,22 @@ class DocumentoMatrizSeeder extends Seeder
                     }
                 }
 
-                if (!isset($data['documento'])) {
+                if (!isset($data['grupo']) || !isset($data['documento'])) {
                     continue;
                 }
 
-                $documento = Documento::where('nombre', $data['documento'])->first();
+                $grupo = GrupoDocumento::where('nombre', $data['grupo'])->first();
+                if (!$grupo) {
+                    $this->command->warn("Grupo no encontrado: {$data['grupo']}");
+                    continue;
+                }
+
+                $documento = Documento::where('nombre', $data['documento'])
+                    ->where('grupo_documento_id', $grupo->id)
+                    ->first();
+
                 if (!$documento) {
-                    $this->command->warn("Documento no encontrado: {$data['documento']}");
+                    $this->command->warn("Documento no encontrado: {$data['documento']} en grupo {$data['grupo']}");
                     continue;
                 }
 

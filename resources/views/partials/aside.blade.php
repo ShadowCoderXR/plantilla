@@ -1,16 +1,15 @@
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main" style="background: linear-gradient(135deg, #ffffff, #bfbfbf);" data-color="dark">
     <div class="sidenav-header">
         <i aria-hidden="true"
            class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" id="iconSidenav"></i>
-        <a class="navbar-brand m-0"
+        <a class="navbar-brand m-0" style="display: flex;justify-content: center;"
            href=" https://demos.creative-tim.com/soft-ui-dashboard-pro/pages/dashboards/default.html " target="_blank">
-            <img alt="main_logo" class="navbar-brand-img h-100" src="{{ asset('img/logo-ct-dark.png') }}">
-            <span class="ms-1 font-weight-bold">Soft UI Dashboard PRO</span>
+            <img alt="main_logo" style="max-height: 3.2rem;" class="navbar-brand-img h-200" src="{{ asset('img/favicon.ico') }}">
         </a>
     </div>
-    <hr class="horizontal dark mt-0">
+    <hr class="horizontal white mt-0">
     <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
-        <ul class="navbar-nav">
+        <ul class="navbar-nav mt-3">
             <li class="nav-item">
                 <a aria-controls="dashboardsExamples" aria-expanded="true" class="nav-link active"
                    data-bs-toggle="collapse" href="#dashboardsExamples" role="button">
@@ -50,24 +49,38 @@
                                             <span class="sidenav-normal"> Dashboard </span>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.administrador') ? 'active' : '' }}" href="{{ route('admin.administrador', 1) }}">
-                                            <span class="sidenav-mini-icon text-xs"> A </span>
-                                            <span class="sidenav-normal"> Administrador </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.cliente') ? 'active' : '' }}" href="{{ route('admin.cliente', 1) }}">
-                                            <span class="sidenav-mini-icon text-xs"> C </span>
-                                            <span class="sidenav-normal"> Cliente </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('admin.proveedor') ? 'active' : '' }}" href="{{ route('admin.proveedor', ['id' => 1, 'año' => '2024']) }}">
-                                            <span class="sidenav-mini-icon text-xs"> P </span>
-                                            <span class="sidenav-normal"> Proveedor </span>
-                                        </a>
-                                    </li>
+                                    @if(request()->routeIs('admin.administrador'))
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#">
+                                                <span class="sidenav-mini-icon text-xs"> A </span>
+                                                <span class="sidenav-normal"> Administrador </span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(request()->routeIs('admin.cliente'))
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#">
+                                                <span class="sidenav-mini-icon text-xs"> C </span>
+                                                <span class="sidenav-normal"> Cliente </span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(request()->routeIs('admin.proveedor'))
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#">
+                                                <span class="sidenav-mini-icon text-xs"> P </span>
+                                                <span class="sidenav-normal"> Proveedor </span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(request()->routeIs('admin.documento'))
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#">
+                                                <span class="sidenav-mini-icon text-xs"> D </span>
+                                                <span class="sidenav-normal"> Documento </span>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </div>
                         </li>

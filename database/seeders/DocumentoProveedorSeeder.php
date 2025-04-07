@@ -61,7 +61,7 @@ class DocumentoProveedorSeeder extends Seeder
                     $estado = match (true) {
                         $anio < $anioActual || ($anio == $anioActual && $mesEvaluado < $mesActualNum) => DocumentoProveedor::ESTATUS_FALTANTE,
                         $anio == $anioActual && $mesEvaluado == $mesActualNum => DocumentoProveedor::ESTATUS_POR_CARGAR,
-                        $anio > $anioActual || ($anio == $anioActual && $mesEvaluado > $mesActualNum) => DocumentoProveedor::ESTATUS_FALTANTE,
+                        $anio > $anioActual || ($anio == $anioActual && $mesEvaluado > $mesActualNum) => DocumentoProveedor::ESTATUS_POR_CARGAR,
                         default => DocumentoProveedor::ESTATUS_POR_CARGAR,
                     };
 
