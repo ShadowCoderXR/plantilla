@@ -3,6 +3,8 @@
 @section('breadcrumb' , 'Administrador')
 @section('title' , 'Proveedor')
 
+@section('back-button' , true)
+
 @push('styles')
     <style>
         .text-warning {
@@ -61,6 +63,7 @@
                     <p class="text-muted mb-0" style="font-size: 15px;">
                         {{ $proveedor->descripcion_adicional }}
                     </p>
+                </h5>
             </div>
 
             <hr class="horizontal dark my-0">
@@ -84,7 +87,6 @@
                     <div class="col-md-6">
                         <!-- Cambiamos la clase del botón -->
                         <a class="btn btn-sm bg-gradient-primary btnDescargarDocumentos mb-0"
-                            href="#"
                             style="white-space: nowrap;">
                             <i class="fa fa-download me-2"></i> Descargar
                         </a>
@@ -183,7 +185,7 @@
             @php
                 /** @var \Illuminate\Support\Collection $resultado */
                 $grupos = collect($resultado)->groupBy('grupo');
-                $hayMultiplesGrupos = $grupos->count() > 1;            
+                $hayMultiplesGrupos = $grupos->count() > 1;
             @endphp
 
             <!-- Documentos Única Vez-->
@@ -201,8 +203,8 @@
                             </div>
                             <div class="col-md-3">
                                 <a href="{{ route('admin.documento', [$documento->id, 'uv']) }}"><i class="fa {{ $documento->estado == 'por_cargar' ? 'fa-cloud-upload-alt text-warning' : 'fa-check-circle text-success' }}"></i></a>
-                            </div>                              
-                        @endforeach                
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -214,7 +216,7 @@
                             <div class="my-auto ms-3">
                                 <h6 class="mb-3">{{ $grupo }}</h6>
                             </div>
-                            <a href="#" class="text-sm toggle-table ms-auto" data-target="grupo-{{ Str::slug($grupo) }}">
+                            <a class="text-sm toggle-table ms-auto" data-target="grupo-{{ Str::slug($grupo) }}">
                                 Mostrar <i class="fas fa-chevron-down text-xs ms-1"></i>
                             </a>
                         </div>
@@ -236,7 +238,7 @@
                                 @foreach ($documentos as $fila)
                                     @if (!str_contains($fila['informacion'], 'Documento única vez'))
                                         <tr>
-                                            <td class="text-sm text-bold" 
+                                            <td class="text-sm text-bold"
                                                 style="{{ str_contains($fila['documento'], '- ISR') || str_contains($fila['documento'], '- IVA') ? 'padding-left: 3rem' : 'color: #27272a; white-space: normal; width: 26%' }}"
                                                 @if($fila['informacion'])
                                                 title="{{ $fila['informacion'] }}"
@@ -322,7 +324,7 @@
             const providerId = "{{ $proveedor->id }}";
             const tipo = "{{ $tipoDocumento->id }}";
 
-            window.location.href = `{{ route('admin.proveedor', ['id' => $proveedor->id, 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}`
+            window.location.href = `{{ route('admin.proveedor', ['idProveedor' => $proveedor->id, 'idCliente' => $idCliente, 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}`
                 .replace('__YEAR__', selectedYear)
                 .replace('__TIPO__', tipo);
         });
@@ -364,6 +366,25 @@
         tooltipTriggerList.forEach(function(tooltipTriggerEl) {
             new bootstrap.Tooltip(tooltipTriggerEl)
         })
+    });
+</script>
+
+<script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            document.querySelectorAll('.modal.show').forEach(modal => {
+                const instance = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+                instance.hide();
+            });
+
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            });
+        }
     });
 </script>
 

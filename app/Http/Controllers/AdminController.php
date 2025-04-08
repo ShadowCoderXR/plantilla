@@ -12,6 +12,7 @@ use App\Models\GrupoDocumento;
 use App\Models\Proveedor;
 use App\Models\TipoDocumento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -44,18 +45,19 @@ class AdminController extends Controller
         return view('cliente', compact('cliente', 'anios', 'tiposDocumentos'));
     }
 
-    public function proveedor($id, $anio, $tipo)
+    public function proveedor($idProveedor, $idCliente, $anio, $tipo)
     {
-        $proveedor = Proveedor::findOrFail($id);
-        $clienteIds = $proveedor->clientes()->pluck('clientes.id');
+        $proveedor = Proveedor::findOrFail($idProveedor);
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tipoDocumento = TipoDocumento::findOrFail($tipo);
-        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])->where('cliente_proveedor_id', $id)->get();
 
         $clienteProveedorId = DB::table('cliente_proveedor')
             ->where('proveedor_id', $proveedor->id)
-            ->whereIn('cliente_id', $clienteIds)
+            ->where('cliente_id', $idCliente)
             ->value('id');
+
+        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])->where('cliente_proveedor_id', $clienteProveedorId)->get();
+
 
         if (!$clienteProveedorId) {
             abort(404, 'Relación cliente-proveedor no encontrada.');
@@ -137,21 +139,51 @@ class AdminController extends Controller
             }
         }
 
-        return view('proveedor', compact('proveedor', 'resultado', 'anio', 'anios', 'tipoDocumento', 'resultadoUnicaVez'));
+        return view('proveedor', compact('proveedor', 'resultado', 'anio', 'anios', 'tipoDocumento', 'resultadoUnicaVez', 'idCliente'));
     }
 
     public function documento($id, $unicaVez = null)
     {
         if ($unicaVez === 'uv') {
-            $documentoProveedor = DocumentoProveedorUnicaVez::with('documento', 'clienteProveedor')->findOrFail($id);
-            return view('documento', compact('documentoProveedor', 'unicaVez'));        
-        }else if ($unicaVez === null) {
+            $documentoProveedor = DocumentoProveedorUnicaVez::with('documento')->findOrFail($id);
+        } else if ($unicaVez === null) {
             $documentoProveedor = DocumentoProveedor::with('documento', 'clienteProveedor')->findOrFail($id);
-            return view('documento', compact('documentoProveedor'));        
-        }else {
+        } else {
             return back()->with('error', 'Error.');
         }
 
+        $folderPath = storage_path("app/public/{$documentoProveedor->ruta}");
+        $archivos = [];
+
+        if (File::exists($folderPath)) {
+            $archivos = collect(File::files($folderPath))->map(function ($file) {
+                return $file->getFilename();
+            });
+        }
+
+        if (count($archivos) === 0) {
+            if ($unicaVez === 'uv') {
+                $documentoProveedor->estado = 'por_cargar';
+            } else {
+                $now = Carbon::now();
+                $anioActual = (int) $now->year;
+                $mesActual = (int) $now->month;
+
+                $anioDoc = (int) $documentoProveedor->anio;
+                $mesDoc = (int) $documentoProveedor->mes;
+
+                if ($anioDoc < $anioActual || ($anioDoc === $anioActual && $mesDoc < $mesActual)) {
+                    $documentoProveedor->estado = 'faltante';
+                } else {
+                    $documentoProveedor->estado = 'por_cargar';
+                }
+            }
+
+            $documentoProveedor->fecha_carga = null;
+            $documentoProveedor->save();
+        }
+
+        return view('documento', compact('documentoProveedor', 'unicaVez', 'archivos'));
     }
 
     public function documentoGuardar(Request $request, $id, $unicaVez = null)
@@ -171,19 +203,19 @@ class AdminController extends Controller
                 'clienteProveedor.cliente.administradores',
                 'clienteProveedor.proveedor',
                 'documento.grupo.tipoDocumento'
-            ])->findOrFail($id);    
+            ])->findOrFail($id);
         }else if ($unicaVez === null) {
             $documento = DocumentoProveedor::with([
                 'clienteProveedor.cliente.administradores',
                 'clienteProveedor.proveedor',
                 'documento.grupo.tipoDocumento'
-            ])->findOrFail($id);    
+            ])->findOrFail($id);
         }else {
             return response()->json([
                 'message' => 'Error.',
-            ], 200);            
+            ], 200);
         }
-        
+
 
         $administrador = $documento->clienteProveedor->cliente->administradores->first()->nombre ?? 'administrador';
         $cliente = $documento->clienteProveedor->cliente->nombre ?? 'cliente';
@@ -200,7 +232,17 @@ class AdminController extends Controller
         $mes = $documento->mes;
 
         $nombreDocumento = $documento->documento->nombre ?? 'documento';
-        $nombreNormalizado = $this->slugify($nombreDocumento);
+        if (str_contains($nombreDocumento, '- ISR')) {
+            $padre = 'declaraciones_mensuales_retenciones_isr';
+            $subcarpeta = $this->slugify($nombreDocumento);
+            $nombreNormalizado = "{$padre}/{$subcarpeta}";
+        } elseif (str_contains($nombreDocumento, '- IVA')) {
+            $padre = 'declaraciones_mensuales_retenciones_iva';
+            $subcarpeta = $this->slugify($nombreDocumento);
+            $nombreNormalizado = "{$padre}/{$subcarpeta}";
+        } else {
+            $nombreNormalizado = $this->slugify($nombreDocumento);
+        }
         //$extension = $archivo->getClientOriginalExtension();
         //$nombreFinal = "{$nombreNormalizado}.{$extension}";
         $nombreFinal = $archivo->getClientOriginalName();
@@ -218,18 +260,17 @@ class AdminController extends Controller
         if ($documento->ruta && Storage::disk('public')->exists($documento->ruta)) {
             Storage::disk('public')->delete($documento->ruta);
         }
-        
+
         $rutaArchivo = $archivo->storeAs($ruta, $nombreFinal, 'public');
         $posicionUltimoSlash = strrpos($rutaArchivo, '/');
         $rutaArchivo = substr($rutaArchivo, 0, $posicionUltimoSlash);
 
-        if (!$documento->ruta){
-            $documento->ruta = $rutaArchivo;
-            //$documento->extension = $extension;
-            $documento->estado = DocumentoProveedor::ESTATUS_CARGADO;
-            $documento->fecha_carga = now();
-            $documento->save();
-        }        
+
+        $documento->ruta = $rutaArchivo;
+        //$documento->extension = $extension;
+        $documento->estado = DocumentoProveedor::ESTATUS_CARGADO;
+        $documento->fecha_carga = now();
+        $documento->save();
 
         return response()->json([
             'message' => 'Archivo subido correctamente.',
@@ -244,6 +285,8 @@ class AdminController extends Controller
         $string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
         $string = preg_replace('/[^a-z0-9_]/', '', $string);
         $string = str_replace('.', '', $string);
+        $string = preg_replace('/_+/', '_', $string);
+        $string = trim($string, '_');
 
         return $string;
     }
@@ -257,7 +300,7 @@ class AdminController extends Controller
         }else {
             return back()->with('error', 'Error.');
         }
-        
+
         $folderPath = storage_path("app/public/{$documento->ruta}");
 
         $zipFileName = 'archivos_comprimidos.zip';
@@ -287,9 +330,23 @@ class AdminController extends Controller
             return response()->download($zipFilePath)->deleteFileAfterSend(true);
         } else {
             return response()->json(['error' => 'No se pudo crear el archivo zip.'], 500);
-        }        
+        }
+    }
+    public function eliminarArchivo(Request $request)
+    {
+        $request->validate([
+            'ruta' => 'required|string',
+            'archivo' => 'required|string',
+        ]);
 
-        
+        $fullPath = storage_path("app/public/{$request->ruta}/{$request->archivo}");
+
+        if (File::exists($fullPath)) {
+            File::delete($fullPath);
+            return back()->with('success', 'Archivo eliminado correctamente.');
+        }
+
+        return back()->with('error', 'Archivo no encontrado.');
     }
 
     public function generarZip(Request $request)

@@ -4,7 +4,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                 <li class="breadcrumb-item text-sm">
-                    <a class="opacity-3 text-dark" href="javascript:">
+                    <a class="opacity-3 text-dark" href="{{ route('admin.dashboard') }}">
                         <svg class="mb-1" height="12px" version="1.1" viewBox="0 0 45 40" width="12px"
                              xmlns="http://www.w3.org/2000/svg">
                             <title>shop </title>
@@ -22,21 +22,33 @@
                         </svg>
                     </a>
                 </li>
-                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:">Dashboard</a>
+                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ route('admin.dashboard') }}">Dashboard</a>
                 </li>
                 <li aria-current="page" class="breadcrumb-item text-sm text-dark active">@yield('breadcrumb', 'default')</li>
             </ol>
             <h6 class="font-weight-bolder mb-0">@yield('title', 'default')</h6>
         </nav>
-        <div class="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ">
-            <a class="nav-link text-body p-0" href="javascript:">
-                <div class="sidenav-toggler-inner">
-                    <i class="sidenav-toggler-line"></i>
-                    <i class="sidenav-toggler-line"></i>
-                    <i class="sidenav-toggler-line"></i>
-                </div>
-            </a>
-        </div>
 
+        <div class="d-flex align-items-center gap-2">
+            <a href="javascript:history.back()" class="d-flex align-items-center justify-content-center text-secondary"
+               style="width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.05);" title="Atrás">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+
+            <a href="javascript:history.forward()" class="d-flex align-items-center justify-content-center text-secondary"
+               style="width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.05);" title="Adelante">
+                <i class="fas fa-arrow-right fa-sm"></i>
+            </a>
+
+            <div class="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ms-2">
+                <a class="nav-link text-body p-0" href="javascript:">
+                    <div class="sidenav-toggler-inner">
+                        <i class="sidenav-toggler-line"></i>
+                        <i class="sidenav-toggler-line"></i>
+                        <i class="sidenav-toggler-line"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 </nav>

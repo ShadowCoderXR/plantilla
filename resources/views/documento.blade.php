@@ -59,6 +59,35 @@
                                         {{ $documentoProveedor->fecha_carga ? \Carbon\Carbon::parse($documentoProveedor->fecha_carga)->translatedFormat('d \d\e F \d\e Y h:i A') : 'No cargado' }}
                                     </span>
                                 </li>
+                                @if(isset($archivos) && count($archivos) > 0)
+                                    <li class="list-group-item">
+                                        <span class="fw-bold d-block">Archivos en carpeta</span>
+                                        <ul class="mb-0 list-unstyled">
+                                            @foreach($archivos as $archivo)
+                                                <li class="d-flex justify-content-between align-items-center py-1">
+                                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                                        <span>{{ $archivo }}</span>
+                                                        <form method="POST"
+                                                              action="{{ route('admin.documento.archivo.eliminar') }}"
+                                                              onsubmit="return confirm('¿Seguro que deseas eliminar este archivo?');"
+                                                              class="ms-2">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <input type="hidden" name="ruta" value="{{ $documentoProveedor->ruta }}">
+                                                            <input type="hidden" name="archivo" value="{{ $archivo }}">
+                                                            <button type="submit"
+                                                                    class="btn btn-outline-danger p-1"
+                                                                    style="font-size: 0.75rem; line-height: 1; border-radius: 6px; width: 40px; height: 28px;"
+                                                                    title="Eliminar archivo">
+                                                                <i class="fas fa-trash fa-sm"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                @endif
                             </ul>
                         </div>
 
@@ -88,7 +117,7 @@
                                     action="{{ route('admin.documento.guardar', [$documentoProveedor->id, $unicaVez]) }}"
                                     class="form-control dropzone"
                                     enctype="multipart/form-data"
-                                    id="productImg"
+                                    id="documento"
                                     method="POST">
                                     @csrf
                                 </form>
@@ -103,54 +132,56 @@
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @push('scripts')
-        <!-- Dropzone -->
-        <script>
-            Dropzone.autoDiscover = false;
+@push('scripts')
+    <!-- Dropzone -->
+    <script>
+        Dropzone.autoDiscover = false;
 
-            let productImg = new Dropzone("#productImg", {
-                url: "{{ route('admin.documento.guardar', [$documentoProveedor->id, $unicaVez]) }}",
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                acceptedFiles: ".pdf,.xlsx,.xls,.sue",
-                addRemoveLinks: true,
-                dictRemoveFile: "Eliminar",
-                autoProcessQueue: false,
-                uploadMultiple: false,            
-                parallelUploads: 1,
-                maxFiles: 1000,
-                maxFilesize: 4096,
-                timeout: 0,
-                dictDefaultMessage: "Clic para elegir los archivos a cargar",
-                dictInvalidFileType: "Solo se permiten archivos PDF, XLSX, XLS, y SUE",
-                dictMaxFilesExceeded: "Solo puedes subir 1000 archivos",
-            });
+        let documento = new Dropzone("#documento", {
+            url: "{{ route('admin.documento.guardar', [$documentoProveedor->id, $unicaVez]) }}",
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            },
+            acceptedFiles: ".pdf,.xlsx,.xls,.sue",
+            addRemoveLinks: true,
+            dictRemoveFile: "Eliminar",
+            autoProcessQueue: false,
+            uploadMultiple: false,
+            parallelUploads: 1,
+            maxFiles: 1000,
+            maxFilesize: 4096,
+            timeout: 0,
+            dictDefaultMessage: "Clic para elegir los archivos a cargar",
+            dictInvalidFileType: "Solo se permiten archivos PDF, XLSX, XLS, y SUE",
+            dictMaxFilesExceeded: "Solo puedes subir 1000 archivos",
+        });
 
-            document.getElementById("uploadButton").addEventListener("click", function () {
-                if (productImg.files.length === 0) {
-                    alert("Por favor, sube un archivo antes de enviar.");
-                } else {
-                    productImg.processQueue();
-                }
-            });
+        document.getElementById("uploadButton").addEventListener("click", function () {
+            if (documento.files.length === 0) {
+                alert("Por favor, sube un archivo antes de enviar.");
+            } else {
+                documento.processQueue();
+            }
+        });
 
-            productImg.on("success", function(file) {
-                productImg.removeFile(file);
+        documento.on("success", function(file) {
+            documento.removeFile(file);
 
-                if (productImg.getQueuedFiles().length > 0) {
-                    productImg.processQueue();
-                } else {
-                    alert('Los archivos han sido cargados con éxito.');
-                }
-            });
+            if (documento.getQueuedFiles().length > 0) {
+                documento.processQueue();
+            } else {
+                alert('Los archivos han sido cargados con éxito.');
+                window.location.reload();
+            }
+        });
 
-            productImg.on("error", function (file, response) {
-                alert("Hubo un error al subir el archivo: " + response);
-                //productImg.removeFile(file);
-            });
+        documento.on("error", function (file, response) {
+            alert("Hubo un error al subir el archivo: " + response);
+            documento.removeFile(file);
+        });
 
-        </script>
-    @endpush
+    </script>
+@endpush

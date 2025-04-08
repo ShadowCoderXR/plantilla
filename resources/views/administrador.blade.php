@@ -3,6 +3,8 @@
 @section('breadcrumb' , 'Administrador')
 @section('title' , 'Administrador')
 
+@section('back-button' , true)
+
 @push('styles')
 @endpush
 
@@ -73,14 +75,13 @@
                     <div class="col-md-6">
                         <!-- Cambiamos la clase del botón -->
                         <a class="btn btn-sm bg-gradient-primary btnDescargarDocumentos mb-0"
-                            href="#"
                             style="white-space: nowrap;">
                             <i class="fa fa-download me-2"></i> Descargar
                         </a>
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
@@ -156,7 +157,7 @@
                             </a>
                         </div>
                     </div>
-                    <a href="#" class="text-sm toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
+                    <a class="text-sm toggle-providers ms-auto">Ver más <i class="fas fa-chevron-down text-xs ms-1"></i></a>
                 </div>
                 <div class="ps-5 pt-3 ms-3 providers-list" style="display: none;">
                     <h6 class="text-uppercase text-sm mb-3">Proveedores</h6>
@@ -168,8 +169,10 @@
                             <h6 class="mb-0 text-sm">{{ $proveedor->nombre }}</h6>
                         </div>
                         <div class="ms-auto d-flex align-items-center">
-                            <a href="#" class="btn btn-sm bg-gradient-primary btnProveedorDocumentos mb-0"
-                                data-proveedor-id="{{ $proveedor->id }}">
+                            <a class="btn btn-sm bg-gradient-primary btnProveedorDocumentos mb-0"
+                                data-proveedor-id="{{ $proveedor->id }}"
+                                data-cliente-id="{{ $cliente->id }}">
+
                                 Documentos
                             </a>
                         </div>
@@ -203,7 +206,8 @@
             </div>
             <div class="modal-body pt-2 pb-2 px-3">
                 <form id="formDocumentos">
-                    <input type="hidden" id="inputProveedorId" name="id"> <!-- 👈 Aquí va el proveedor_id -->
+                    <input type="hidden" id="inputProveedorId" name="idProveedor">
+                    <input type="hidden" id="inputClienteId" name="idCliente">
 
                     <div class="mb-3">
                         <label for="modalAnioSelector" class="form-label text-sm">Año</label>
@@ -258,7 +262,9 @@
         document.querySelectorAll(".btnProveedorDocumentos").forEach(btn => {
             btn.addEventListener("click", function() {
                 const proveedorId = this.getAttribute("data-proveedor-id");
+                const clienteId = this.getAttribute("data-cliente-id");
                 document.getElementById("inputProveedorId").value = proveedorId;
+                document.getElementById("inputClienteId").value = clienteId;
 
                 const modal = new bootstrap.Modal(document.getElementById("modalDocumentos"));
                 modal.show();
@@ -270,11 +276,13 @@
             e.preventDefault();
 
             const proveedorId = document.getElementById("inputProveedorId").value;
+            const clienteId = document.getElementById("inputClienteId").value;
             const anio = document.getElementById("modalAnioSelector").value;
             const tipo = document.getElementById("modalTipoDocumentoSelector").value;
 
-            const url = "{{ route('admin.proveedor', ['id' => '__ID__', 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}"
-                .replace('__ID__', proveedorId)
+            const url = "{{ route('admin.proveedor', ['idProveedor' => '__IDPROVEEDOR__', 'idCliente' => '__IDCLIENTE__','año' => '__YEAR__', 'tipo' => '__TIPO__']) }}"
+                .replace('__IDPROVEEDOR__', proveedorId)
+                .replace('__IDCLIENTE__', clienteId)
                 .replace('__YEAR__', anio)
                 .replace('__TIPO__', tipo);
 
@@ -311,4 +319,24 @@
         });
     });
 </script>
+
+<script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            document.querySelectorAll('.modal.show').forEach(modal => {
+                const instance = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+                instance.hide();
+            });
+
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            });
+        }
+    });
+</script>
+
 @endpush

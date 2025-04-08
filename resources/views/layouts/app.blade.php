@@ -77,6 +77,14 @@
         <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
         <script src="{{ asset('js/soft-ui-dashboard.min.js?v=1.1.1') }}"></script>
 
+        <script>
+            window.addEventListener('pageshow', function (event) {
+                // Si viene del historial (bfcache), forzamos reload
+                if (event.persisted || (performance && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+                    location.reload();
+                }
+            });
+        </script>
         <!--   Page specific scripts   -->
         @stack('scripts')
 

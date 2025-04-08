@@ -40,10 +40,10 @@ REPSE,IMSS Bimestral,sí,sí,sí,sí,sí,sí,no,sí,sí,no,sí,sí
 REPSE,CFDI IMSS,sí,sí,sí,sí,sí,sí,sí,sí,sí,sí,no,sí
 REPSE,CFDI INFONAVIT,no,no,sí,no,sí,sí,sí,sí,sí,sí,sí,sí
 REPSE,Comprobante de Pago IMSS/INFONAVIT,sí,no,no,sí,sí,no,sí,no,sí,sí,sí,sí
-REPSE,Declaraciones Mensuales Retenciones ISR,no,no,sí,sí,sí,sí,sí,sí,sí,sí,sí,no
-REPSE,Acuse - ISR,no,no,no,no,no,no,no,no,no,no,no,no
-REPSE,Pago SAT - ISR,no,no,no,no,no,no,no,no,no,no,no,no
-REPSE,Pago Bancario - ISR,no,no,no,no,no,no,no,no,no,no,no,no
+REPSE,Declaraciones Mensuales Retenciones ISR,si,si,sí,sí,sí,sí,sí,sí,sí,sí,sí,no
+REPSE,Acuse - ISR,si,si,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago SAT - ISR,si,si,no,no,no,no,no,no,no,no,no,no
+REPSE,Pago Bancario - ISR,si,si,no,no,no,no,no,no,no,no,no,no
 REPSE,Declaraciones Mensuales Retenciones IVA,no,no,no,no,no,no,no,no,no,no,no,no
 REPSE,Acuse - IVA,no,no,no,no,no,no,no,no,no,no,no,no
 REPSE,Pago SAT - IVA,no,no,no,no,no,no,no,no,no,no,no,no
