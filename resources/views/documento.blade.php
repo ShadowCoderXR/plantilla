@@ -16,10 +16,12 @@
         <div class="col-lg-8 mx-auto">
             <div class="card">
                 <!-- Encabezado de la tarjeta -->
-                <div class="card-header">
+                <div class="card-header mb-0">
                     <h5 class="mb-0">Información del Documento</h5>
                     <p class="text-sm mb-0">
-                        Este documento pertenece a <strong>{{ $documentoProveedor->clienteProveedor->proveedor->nombre }}</strong>
+                        Este documento pertenece al proveedor <strong>{{ $documentoProveedor->clienteProveedor->proveedor->nombre }}</strong></p>
+                    <p class="text-sm mb-0">Asociado al cliente <strong>{{ $documentoProveedor->clienteProveedor->cliente->nombre }}</strong>
+                        de la empresa <strong>{{ $documentoProveedor->clienteProveedor->cliente->administradores->first()->nombre }}</strong>.
                     </p>
                 </div>
 
@@ -33,7 +35,11 @@
                                     <span class="fw-bold d-block">Nombre del Documento</span>
                                     <span class="text-muted">{{ $documentoProveedor->documento->nombre}}</span>
                                 </li>
-
+                                <li class="list-group-item">
+                                    <span class="fw-bold d-block">Fecha de solicitud</span>
+                                    <span class="text-muted">
+                                        {{ $documentoProveedor->mes }} de {{ $documentoProveedor->anio }}
+                                </li>
 
                                 @if($documentoProveedor->documento->informacion && $documentoProveedor->documento->informacion != 'Documento única vez')
                                     <li class="list-group-item">

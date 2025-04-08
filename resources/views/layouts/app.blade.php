@@ -21,11 +21,31 @@
         <link href="{{ asset('css/nucleo-svg.css') }}" rel="stylesheet"/>
         <!-- CSS Files -->
         <link href="{{ asset('css/soft-ui-dashboard.css?v=1.1.1') }}" id="pagestyle" rel="stylesheet"/>
-        <style></style>
+        <style>
+            #loader {
+                opacity: 1;
+                transition: opacity 0.5s ease;
+            }
+
+            #loader.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+        </style>
     </head>
 
     <!-- Body -->
     <body class="g-sidenav-show  bg-gray-100">
+
+        <!-- Loader -->
+        <div id="loader"
+             class="d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100"
+             style="z-index: 9999; background-color: rgba(255, 255, 255, 0.9); display: none;">
+            <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+
         @stack('styles')
         <!-- Sidebar -->
         @include('partials.aside')
@@ -78,12 +98,15 @@
         <script src="{{ asset('js/soft-ui-dashboard.min.js?v=1.1.1') }}"></script>
 
         <script>
-            window.addEventListener('pageshow', function (event) {
-                if (event.persisted || (performance && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
-                    location.reload();
+            window.addEventListener('load', function () {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => loader.remove(), 600);
                 }
             });
         </script>
+
         <!--   Page specific scripts   -->
         @stack('scripts')
 

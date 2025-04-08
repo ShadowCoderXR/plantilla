@@ -22,8 +22,9 @@
                 </div>
                 <div class="col-md-8 d-flex align-items-center">
                     <div class="card-body">
-                        <h5 class="mb-3"> {{ $cliente->nombre }} </h5>
-                        <!-- <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6> -->
+                        <h5 class="mb-0"> {{ $cliente->nombre }}</h5>
+                        <p class="text-sm mb-3"> Cliente asociado a la empresa <strong> {{$cliente->administradores->first()->nombre}} </strong> </p>
+{{--                        <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6>--}}
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex align-items-center ps-0">
                                 <i class="fas fa-phone-alt me-2 text-primary"></i>

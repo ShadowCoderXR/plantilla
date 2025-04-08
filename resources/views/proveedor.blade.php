@@ -33,8 +33,9 @@
                 <div class="col-md-8 d-flex align-items-center">
                     <div class="card-body">
                         <h5 class="mb-0">{{ $proveedor->nombre }}</h5>
-                        <p class="text-sm mb-3 text-white">{{ $proveedor->descripcion }}</p>
-                        <!-- <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6> -->
+                        <p class="text-sm mb-3">Proveedor asociado a cliente <strong>{{ $clienteProveedor->cliente->nombre }}
+                            </strong> de la empresa <strong>{{ $clienteProveedor->cliente->administradores->first()->nombre }}</strong></p>
+{{--                        <h6 class="text-uppercase text-sm mb-3">Información de la Empresa</h6>--}}
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex align-items-center ps-0">
                                 <i class="fas fa-phone-alt me-2 text-primary"></i>
@@ -384,6 +385,14 @@
                 modal.style.display = 'none';
                 modal.setAttribute('aria-hidden', 'true');
             });
+        }
+    });
+</script>
+
+<script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted || (performance && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+            location.reload();
         }
     });
 </script>

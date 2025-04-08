@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Administrador;
 use App\Models\Cliente;
+use App\Models\ClienteProveedor;
 use App\Models\Documento;
 use App\Models\DocumentoMatriz;
 use App\Models\DocumentoProveedor;
@@ -29,7 +30,7 @@ class AdminController extends Controller
 
     public function administrador($id)
     {
-        $administrador = Administrador::with('clientes.proveedores')->find($id);
+        $administrador = Administrador::find($id);
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tiposDocumentos = TipoDocumento::all();
 
@@ -38,7 +39,7 @@ class AdminController extends Controller
 
     public function cliente($id)
     {
-        $cliente = Cliente::with('proveedores')->find($id);
+        $cliente = Cliente::findOrFail($id);
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tiposDocumentos = TipoDocumento::all();
 
@@ -51,15 +52,14 @@ class AdminController extends Controller
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tipoDocumento = TipoDocumento::findOrFail($tipo);
 
-        $clienteProveedorId = DB::table('cliente_proveedor')
-            ->where('proveedor_id', $proveedor->id)
+        $clienteProveedor = ClienteProveedor::where('proveedor_id', $proveedor->id)
             ->where('cliente_id', $idCliente)
-            ->value('id');
+            ->first();
 
-        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])->where('cliente_proveedor_id', $clienteProveedorId)->get();
+        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])->where('cliente_proveedor_id', $clienteProveedor->id)->get();
 
 
-        if (!$clienteProveedorId) {
+        if (!$clienteProveedor->id) {
             abort(404, 'Relación cliente-proveedor no encontrada.');
         }
 
@@ -72,7 +72,7 @@ class AdminController extends Controller
 
         $matriz = DocumentoMatriz::where('anio', $anio)->get()->groupBy('documento_id');
 
-        $documentosProveedor = DocumentoProveedor::where('cliente_proveedor_id', $clienteProveedorId)
+        $documentosProveedor = DocumentoProveedor::where('cliente_proveedor_id', $clienteProveedor->id)
             ->where('anio', $anio)
             ->get()
             ->groupBy('documento_id');
@@ -116,7 +116,7 @@ class AdminController extends Controller
                             : 'por_cargar';
 
                         $nuevo = DocumentoProveedor::create([
-                            'cliente_proveedor_id' => $clienteProveedorId,
+                            'cliente_proveedor_id' => $clienteProveedor->id,
                             'documento_id' => $doc->id,
                             'anio' => $anio,
                             'mes' => $mesNombre,
@@ -139,7 +139,7 @@ class AdminController extends Controller
             }
         }
 
-        return view('proveedor', compact('proveedor', 'resultado', 'anio', 'anios', 'tipoDocumento', 'resultadoUnicaVez', 'idCliente'));
+        return view('proveedor', compact('proveedor', 'resultado', 'anio', 'anios', 'tipoDocumento', 'resultadoUnicaVez', 'idCliente', 'clienteProveedor'));
     }
 
     public function documento($id, $unicaVez = null)
@@ -147,7 +147,7 @@ class AdminController extends Controller
         if ($unicaVez === 'uv') {
             $documentoProveedor = DocumentoProveedorUnicaVez::with('documento')->findOrFail($id);
         } else if ($unicaVez === null) {
-            $documentoProveedor = DocumentoProveedor::with('documento', 'clienteProveedor')->findOrFail($id);
+            $documentoProveedor = DocumentoProveedor::with('documento')->findOrFail($id);
         } else {
             return back()->with('error', 'Error.');
         }
