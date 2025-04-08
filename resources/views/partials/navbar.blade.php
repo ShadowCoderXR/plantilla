@@ -40,6 +40,16 @@
                 <i class="fas fa-arrow-right fa-sm"></i>
             </a>
 
+            <form method="POST" action="{{ route('cerrar.sesion') }}" class="m-0">
+                @csrf
+                <button type="submit"
+                        class="d-flex align-items-center justify-content-center text-secondary"
+                        style="height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.05); width: 36px;"
+                        title="Cerrar sesión">
+                    <i class="fas fa-sign-out-alt fa-sm"></i>
+                </button>
+            </form>
+
             <div class="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ms-2">
                 <a class="nav-link text-body p-0" href="javascript:">
                     <div class="sidenav-toggler-inner">

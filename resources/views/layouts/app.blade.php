@@ -79,7 +79,6 @@
 
         <script>
             window.addEventListener('pageshow', function (event) {
-                // Si viene del historial (bfcache), forzamos reload
                 if (event.persisted || (performance && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
                     location.reload();
                 }
