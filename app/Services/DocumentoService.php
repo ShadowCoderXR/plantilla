@@ -84,8 +84,12 @@ class DocumentoService
         };
     }
 
-    public static function obtenerArchivos(string $rutaRelativa): array
+    public static function obtenerArchivos(?string $rutaRelativa): array
     {
+        if (empty($rutaRelativa)) {
+            return [];
+        }
+
         $folderPath = storage_path("app/public/{$rutaRelativa}");
 
         if (!File::exists($folderPath)) {

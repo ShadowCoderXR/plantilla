@@ -18,6 +18,7 @@ use App\Services\DocumentoService;
 use App\Services\LogUsuarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -193,18 +194,63 @@ class AdminController extends Controller
 
     public function generarZip(Request $request)
     {
-        $administrador = Administrador::find($request->administrador_id);
-        $administradorSlugify = Util::slugify($administrador->nombre);
+        dd($request->all());
+        $origen = $request->input('origen', 'administrador');
+        $tipo   = (int) $request->input('tipo', 1);
+        $anio   = $request->input('anio');
+        $mes    = $request->input('mes');
 
-        GenerarZipDocumentos::dispatch($administradorSlugify);
+        if ($origen === 'proveedor') {
+            $administrador = Administrador::findOrFail($request->administrador_id);
+            $cliente       = Cliente::findOrFail($request->cliente_id);
+            $proveedor     = Proveedor::findOrFail($request->proveedor_id);
+            $tipoDocumento = TipoDocumento::findOrFail($request->tipoDocumento_id);
 
-        return redirect()->route('admin.documentos.zip.esperando', ['nombre' => $administradorSlugify]);
+            $adminSlug   = Util::slugify($administrador->nombre);
+            $clienteSlug = Util::slugify($cliente->nombre);
+            $proveedorSlug = Util::slugify($proveedor->nombre);
+            $tipoSlug = Util::slugify($tipoDocumento->nombre);
+
+            GenerarZipDocumentos::dispatch(
+                $adminSlug,
+                $clienteSlug,
+                $tipo,
+                $anio,
+                $mes,
+                $tipoSlug,
+                $proveedorSlug
+            );
+
+            $nombreFinal = "{$adminSlug}-{$clienteSlug}-{$tipoSlug}-{$proveedorSlug}";
+        }
+
+        elseif ($origen === 'cliente') {
+            $administrador = Administrador::findOrFail($request->administrador_id);
+            $cliente       = Cliente::findOrFail($request->cliente_id);
+
+            $adminSlug   = Util::slugify($administrador->nombre);
+            $clienteSlug = Util::slugify($cliente->nombre);
+
+            GenerarZipDocumentos::dispatch($adminSlug, $clienteSlug, $tipo, $anio, $mes);
+            $nombreFinal = "{$adminSlug}-{$clienteSlug}";
+        }
+
+        else {
+            $administrador = Administrador::findOrFail($request->administrador_id);
+            $adminSlug     = Util::slugify($administrador->nombre);
+
+            GenerarZipDocumentos::dispatch($adminSlug, null, $tipo, $anio, $mes);
+            $nombreFinal = $adminSlug;
+        }
+
+        return redirect()->route('admin.documentos.zip.esperando', ['nombre' => $nombreFinal]);
     }
+
 
 
     public function zipProgreso($nombre)
     {
-        $nombre = Util::slugify($nombre);
+        Log::info("Procesando zip progreso $nombre");
         $ruta = storage_path("app/zips/{$nombre}.zip");
         return response()->json(['listo' => File::exists($ruta)]);
     }
@@ -212,7 +258,6 @@ class AdminController extends Controller
 
     public function descargarZip($nombre)
     {
-        $nombre = Util::slugify($nombre);
         $ruta = storage_path("app/zips/{$nombre}.zip");
 
         if (!File::exists($ruta)) abort(404);

@@ -106,9 +106,16 @@
                     </p>
                     <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
                         @csrf
+
+                        <input type="hidden" name="administrador_id" value="{{ $cliente->administradores->first()->id }}">
+                        <input type="hidden" name="cliente_id" value="{{ $cliente->id }}">
+                        <input type="hidden" name="tipo" id="tipoSeleccionado">
+                        <input type="hidden" name="origen" value="cliente">
+
+
                         <div id="grupoMes" class="mb-3" style="display: none;">
                             <label for="mesSeleccionado" class="form-label text-sm">Mes</label>
-                            <select id="mesSeleccionado" class="form-select rounded-2 shadow-sm">
+                            <select id="mesSeleccionado" name="mes" class="form-select rounded-2 shadow-sm">
                                 @foreach(range(1, 12) as $mes)
                                 <option value="{{ $mes }}">{{ \Carbon\Carbon::create()->month($mes)->translatedFormat('F') }}</option>
                                 @endforeach
@@ -117,7 +124,7 @@
 
                         <div id="grupoAnio" class="mb-3" style="display: none;">
                             <label for="anioSeleccionado" class="form-label text-sm">Año</label>
-                            <select id="anioSeleccionado" class="form-select rounded-2 shadow-sm">
+                            <select id="anioSeleccionado" name="anio" class="form-select rounded-2 shadow-sm">
                                 @foreach ($anios as $anio)
                                 <option value="{{ $anio }}">{{ $anio }}</option>
                                 @endforeach
@@ -259,6 +266,7 @@
         const modalSeleccion = new bootstrap.Modal(document.getElementById("modalSeleccion"));
         const grupoMes = document.getElementById("grupoMes");
         const grupoAnio = document.getElementById("grupoAnio");
+        const inputTipo = document.getElementById("tipoSeleccionado");
 
         btnDescargar.addEventListener("click", function(e) {
             e.preventDefault();
@@ -267,6 +275,8 @@
             grupoAnio.style.display = "none";
 
             const tipo = tipoSelect.value;
+            inputTipo.value = tipo;
+
             if (tipo === "2") {
                 grupoAnio.style.display = "block";
             }
