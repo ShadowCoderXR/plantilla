@@ -22,4 +22,11 @@ class ClienteProveedor extends Model
     {
         return $this->belongsTo(Proveedor::class);
     }
+
+    public static function obtenerRelacion(int $clienteId, int $proveedorId): ?self
+    {
+        return self::where('proveedor_id', $proveedorId)
+            ->where('cliente_id', $clienteId)
+            ->first();
+    }
 }

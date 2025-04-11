@@ -28,4 +28,12 @@ class Documento extends Model
     {
         return $this->hasMany(DocumentoProveedor::class, 'documento_id');
     }
+
+    public static function porTipoAgrupadoPorGrupo(int $tipoDocumentoId)
+    {
+        return self::with('grupo')
+            ->whereHas('grupo', fn($query) => $query->where('tipo_documento_id', $tipoDocumentoId))
+            ->get()
+            ->groupBy('grupo.nombre');
+    }
 }

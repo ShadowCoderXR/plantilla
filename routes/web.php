@@ -26,6 +26,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/cliente/{id}/proveedores', [AdminController::class, 'proveedores'])->name('cliente.proveedores');
 
     Route::get('/proveedor/{idProveedor}/{idCliente}/{año}/{tipo}', [AdminController::class, 'proveedor'])->name('proveedor');
+
+    Route::post('/documentos/zip', [AdminController::class, 'generarZip'])->name('documentos.zip');
+    Route::get('/documentos/zip-progreso/{nombre}', [AdminController::class, 'zipProgreso'])->name('documentos.zip.progreso');
+    Route::get('/documentos/descargar/{nombre}', [AdminController::class, 'descargarZip'])->name('documentos.zip.descargar');
+    Route::get('/documentos/esperando/{nombre}', [AdminController::class, 'esperandoVista'])->name('documentos.zip.esperando');
+
+
 });
 
 Route::post('/descargar-documentos', [AdminController::class, 'generarZip'])->name('documentos.zip');

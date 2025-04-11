@@ -325,7 +325,7 @@
             const providerId = "{{ $proveedor->id }}";
             const tipo = "{{ $tipoDocumento->id }}";
 
-            window.location.href = `{{ route('admin.proveedor', ['idProveedor' => $proveedor->id, 'idCliente' => $idCliente, 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}`
+            window.location.href = `{{ route('admin.proveedor', ['idProveedor' => $proveedor->id, 'idCliente' => $clienteProveedor->cliente->id, 'año' => '__YEAR__', 'tipo' => '__TIPO__']) }}`
                 .replace('__YEAR__', selectedYear)
                 .replace('__TIPO__', tipo);
         });

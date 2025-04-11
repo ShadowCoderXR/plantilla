@@ -19,4 +19,18 @@ class DocumentoMatriz extends Model
     {
         return $this->belongsTo(Documento::class, 'documento_id');
     }
+
+    public static function aniosDisponibles(): array
+    {
+        return self::select('anio')
+            ->distinct()
+            ->orderByDesc('anio')
+            ->pluck('anio')
+            ->toArray();
+    }
+
+    public static function porAnioAgrupado(int $anio)
+    {
+        return self::where('anio', $anio)->get()->groupBy('documento_id');
+    }
 }

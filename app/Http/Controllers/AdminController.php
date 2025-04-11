@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LogUsuarioAccion;
+use App\Helpers\Util;
+use App\Jobs\GenerarZipDocumentos;
 use App\Models\Administrador;
 use App\Models\Cliente;
 use App\Models\ClienteProveedor;
@@ -9,15 +12,12 @@ use App\Models\Documento;
 use App\Models\DocumentoMatriz;
 use App\Models\DocumentoProveedor;
 use App\Models\DocumentoProveedorUnicaVez;
-use App\Models\GrupoDocumento;
 use App\Models\Proveedor;
 use App\Models\TipoDocumento;
+use App\Services\DocumentoService;
+use App\Services\LogUsuarioService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
-use ZipArchive;
 
 class AdminController extends Controller
 {
@@ -25,7 +25,12 @@ class AdminController extends Controller
     {
         $administradores = Administrador::all();
 
-        return view('dashboard', compact('administradores'));
+        return LogUsuarioService::logRespuesta([
+            'accion' => LogUsuarioAccion::DASHBOARD,
+            'descripcion' => 'Acceso al dashboard',
+            'vista' => 'dashboard',
+            'data' => compact('administradores'),
+        ]);
     }
 
     public function administrador($id)
@@ -34,7 +39,12 @@ class AdminController extends Controller
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tiposDocumentos = TipoDocumento::all();
 
-        return view('administrador', compact('administrador', 'anios', 'tiposDocumentos'));
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::ADMINISTRADOR,
+            'descripcion' => "El usuario accedió al administrador: {$administrador->nombre} (ID: {$id})",
+            'vista'       => 'administrador',
+            'data'        => compact('administrador', 'anios', 'tiposDocumentos'),
+        ]);
     }
 
     public function cliente($id)
@@ -43,342 +53,176 @@ class AdminController extends Controller
         $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tiposDocumentos = TipoDocumento::all();
 
-        return view('cliente', compact('cliente', 'anios', 'tiposDocumentos'));
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::CLIENTE,
+            'descripcion' => "Acceso a vista del cliente: {$cliente->nombre} (ID: {$cliente->id})",
+            'vista'       => 'cliente',
+            'data'        => compact('cliente', 'anios', 'tiposDocumentos'),
+        ]);
     }
 
     public function proveedor($idProveedor, $idCliente, $anio, $tipo)
     {
         $proveedor = Proveedor::findOrFail($idProveedor);
-        $anios = DocumentoMatriz::select('anio')->distinct()->orderBy('anio', 'desc')->pluck('anio')->toArray();
         $tipoDocumento = TipoDocumento::findOrFail($tipo);
 
-        $clienteProveedor = ClienteProveedor::where('proveedor_id', $proveedor->id)
-            ->where('cliente_id', $idCliente)
-            ->first();
-
-        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])->where('cliente_proveedor_id', $clienteProveedor->id)->get();
-
-
-        if (!$clienteProveedor->id) {
+        $clienteProveedor = ClienteProveedor::obtenerRelacion($idCliente, $proveedor->id);
+        if (!$clienteProveedor) {
             abort(404, 'Relación cliente-proveedor no encontrada.');
         }
 
-        $documentos = Documento::with('grupo')
-            ->whereHas('grupo', function ($query) use ($tipo) {
-                $query->where('tipo_documento_id', $tipo);
-            })
-            ->get()
-            ->groupBy('grupo.nombre');
+        $anios = DocumentoMatriz::aniosDisponibles();
 
-        $matriz = DocumentoMatriz::where('anio', $anio)->get()->groupBy('documento_id');
+        $resultadoUnicaVez = DocumentoProveedorUnicaVez::with(['documento', 'clienteProveedor'])
+            ->where('cliente_proveedor_id', $clienteProveedor->id)
+            ->get();
 
-        $documentosProveedor = DocumentoProveedor::where('cliente_proveedor_id', $clienteProveedor->id)
-            ->where('anio', $anio)
-            ->get()
-            ->groupBy('documento_id');
+        $documentos = Documento::porTipoAgrupadoPorGrupo($tipo);
+        $matriz = DocumentoMatriz::porAnioAgrupado($anio);
+        $documentosProveedor = DocumentoProveedor::porRelacionYAnioAgrupado($clienteProveedor->id, $anio);
 
-        $mesActual = now()->month;
-        $anioActual = now()->year;
+        $resultado = DocumentoService::generarResultadoMensual(
+            $documentos,
+            $matriz,
+            $documentosProveedor,
+            $clienteProveedor,
+            $anio
+        );
 
-        $resultado = [];
-
-        foreach ($documentos as $grupo => $docs) {
-            foreach ($docs as $doc) {
-                $fila = [
-                    'id_documento' => $doc->id,
-                    'documento' => $doc->nombre,
-                    'informacion' => $doc->informacion,
-                    'grupo' => $grupo,
-                    'meses' => []
-                ];
-
-                $mesesNombre = [
-                    1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
-                    5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
-                    9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre',
-                ];
-
-                for ($mes = 1; $mes <= 12; $mes++) {
-                    $mesNombre = $mesesNombre[$mes];
-
-                    $esObligatorio = $matriz[$doc->id]->firstWhere('mes', $mesNombre)?->obligatorio ?? false;
-
-                    $registro = $documentosProveedor[$doc->id]->firstWhere('mes', $mesNombre);
-
-                    if ($registro) {
-                        $fila['meses'][$mes] = [
-                            'estado' => $registro->estado,
-                            'id' => $registro->id
-                        ];
-                    } elseif ($esObligatorio) {
-                        $estado = ($anio < $anioActual || ($anio == $anioActual && $mes < $mesActual))
-                            ? 'faltante'
-                            : 'por_cargar';
-
-                        $nuevo = DocumentoProveedor::create([
-                            'cliente_proveedor_id' => $clienteProveedor->id,
-                            'documento_id' => $doc->id,
-                            'anio' => $anio,
-                            'mes' => $mesNombre,
-                            'estado' => $estado
-                        ]);
-
-                        $fila['meses'][$mes] = [
-                            'estado' => $estado,
-                            'id' => $nuevo->id
-                        ];
-                    } else {
-                        $fila['meses'][$mes] = [
-                            'estado' => 'no_requerido',
-                            'id' => null
-                        ];
-                    }
-                }
-
-                $resultado[] = $fila;
-            }
-        }
-
-        return view('proveedor', compact('proveedor', 'resultado', 'anio', 'anios', 'tipoDocumento', 'resultadoUnicaVez', 'idCliente', 'clienteProveedor'));
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::PROVEEDORES,
+            'descripcion' => "Vista proveedor ID {$proveedor->id}, cliente ID {$idCliente}, año {$anio}, tipo {$tipo}",
+            'vista'       => 'proveedor',
+            'data'        => compact(
+                'proveedor',
+                'resultado',
+                'anio',
+                'anios',
+                'tipoDocumento',
+                'resultadoUnicaVez',
+                'clienteProveedor'
+            ),
+        ]);
     }
+
 
     public function documento($id, $unicaVez = null)
     {
-        if ($unicaVez === 'uv') {
-            $documentoProveedor = DocumentoProveedorUnicaVez::with('documento')->findOrFail($id);
-        } else if ($unicaVez === null) {
-            $documentoProveedor = DocumentoProveedor::with('documento')->findOrFail($id);
-        } else {
+        try {
+            $documentoProveedor = DocumentoService::obtenerDocumentoProveedor($id, $unicaVez);
+        } catch (\InvalidArgumentException $e) {
             return back()->with('error', 'Error.');
         }
 
-        $folderPath = storage_path("app/public/{$documentoProveedor->ruta}");
-        $archivos = [];
+        $archivos = DocumentoService::obtenerArchivos($documentoProveedor->ruta);
 
-        if (File::exists($folderPath)) {
-            $archivos = collect(File::files($folderPath))->map(function ($file) {
-                return $file->getFilename();
-            });
-        }
+        DocumentoService::actualizarEstadoSiNoHayArchivos($documentoProveedor, $archivos, $unicaVez);
 
-        if (count($archivos) === 0) {
-            if ($unicaVez === 'uv') {
-                $documentoProveedor->estado = 'por_cargar';
-            } else {
-                $now = Carbon::now();
-                $anioActual = (int) $now->year;
-                $mesActual = (int) $now->month;
-
-                $anioDoc = (int) $documentoProveedor->anio;
-                $mesDoc = (int) $documentoProveedor->mes;
-
-                if ($anioDoc < $anioActual || ($anioDoc === $anioActual && $mesDoc < $mesActual)) {
-                    $documentoProveedor->estado = 'faltante';
-                } else {
-                    $documentoProveedor->estado = 'por_cargar';
-                }
-            }
-
-            $documentoProveedor->fecha_carga = null;
-            $documentoProveedor->save();
-        }
-
-        return view('documento', compact('documentoProveedor', 'unicaVez', 'archivos'));
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::DOCUMENTOS,
+            'descripcion' => "Acceso a documento ID {$id}" . ($unicaVez === 'uv' ? ' (única vez)' : ''),
+            'vista'       => 'documento',
+            'data'        => compact('documentoProveedor', 'unicaVez', 'archivos'),
+        ]);
     }
 
     public function documentoGuardar(Request $request, $id, $unicaVez = null)
     {
-        $request->validate([
-            'file' => 'required|mimes:pdf,xlsx,xls,sue|max:4096',
+        try {
+            $resultado = DocumentoService::guardarDocumento($request, $id, $unicaVez);
+        } catch (\InvalidArgumentException $e) {
+            return LogUsuarioService::logRespuesta([
+                'accion'      => LogUsuarioAccion::SUBIR_DOCUMENTO,
+                'descripcion' => 'Error al subir documento (parámetro inválido)',
+                'respuesta'   => response()->json(['message' => 'Error.'], 400),
+            ]);
+        }
+
+        if ($resultado['error']) {
+            return LogUsuarioService::logRespuesta([
+                'accion'      => LogUsuarioAccion::SUBIR_DOCUMENTO,
+                'descripcion' => "Error al subir documento ID {$id}" . ($unicaVez === 'uv' ? ' (única vez)' : ''),
+                'respuesta'   => response()->json(['message' => $resultado['message']], $resultado['status']),
+            ]);
+        }
+
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::SUBIR_DOCUMENTO,
+            'descripcion' => "Subida de documento ID {$id}" . ($unicaVez === 'uv' ? ' (única vez)' : ''),
+            'respuesta'   => response()->json([
+                'message' => $resultado['message'],
+                'ruta'    => $resultado['ruta'],
+            ], $resultado['status']),
         ]);
-
-        $archivo = $request->file('file');
-
-        if (!$archivo) {
-            return response()->json(['message' => 'No se recibió ningún archivo.'], 400);
-        }
-
-        if ($unicaVez === 'uv'){
-            $documento = DocumentoProveedorUnicaVez::with([
-                'clienteProveedor.cliente.administradores',
-                'clienteProveedor.proveedor',
-                'documento.grupo.tipoDocumento'
-            ])->findOrFail($id);
-        }else if ($unicaVez === null) {
-            $documento = DocumentoProveedor::with([
-                'clienteProveedor.cliente.administradores',
-                'clienteProveedor.proveedor',
-                'documento.grupo.tipoDocumento'
-            ])->findOrFail($id);
-        }else {
-            return response()->json([
-                'message' => 'Error.',
-            ], 200);
-        }
-
-
-        $administrador = $documento->clienteProveedor->cliente->administradores->first()->nombre ?? 'administrador';
-        $cliente = $documento->clienteProveedor->cliente->nombre ?? 'cliente';
-        $proveedor = $documento->clienteProveedor->proveedor->nombre ?? 'proveedor';
-        $tipo = $documento->documento->grupo->tipoDocumento->nombre ?? 'tipo';
-        $grupo = $documento->documento->grupo->nombre ?? 'grupo';
-
-        $administradorSlug = $this->slugify($administrador);
-        $clienteSlug = $this->slugify($cliente);
-        $proveedorSlug = $this->slugify($proveedor);
-        $tipoSlug = $this->slugify($tipo);
-        $grupoSlug = $this->slugify($grupo);
-        $anio = $documento->anio;
-        $mes = $documento->mes;
-
-        $nombreDocumento = $documento->documento->nombre ?? 'documento';
-        if (str_contains($nombreDocumento, '- ISR')) {
-            $padre = 'declaraciones_mensuales_retenciones_isr';
-            $subcarpeta = $this->slugify($nombreDocumento);
-            $nombreNormalizado = "{$padre}/{$subcarpeta}";
-        } elseif (str_contains($nombreDocumento, '- IVA')) {
-            $padre = 'declaraciones_mensuales_retenciones_iva';
-            $subcarpeta = $this->slugify($nombreDocumento);
-            $nombreNormalizado = "{$padre}/{$subcarpeta}";
-        } else {
-            $nombreNormalizado = $this->slugify($nombreDocumento);
-        }
-        //$extension = $archivo->getClientOriginalExtension();
-        //$nombreFinal = "{$nombreNormalizado}.{$extension}";
-        $nombreFinal = $archivo->getClientOriginalName();
-
-        if($tipoSlug !== $grupoSlug) {
-            $tipoSlug = $grupoSlug;
-        }
-
-        if ($documento->documento->informacion == 'Documento única vez') {
-            $ruta = "documentos/{$administradorSlug}/{$clienteSlug}/{$tipoSlug}/{$proveedorSlug}/única_vez/{$nombreNormalizado}";
-        } else {
-            $ruta = "documentos/{$administradorSlug}/{$clienteSlug}/{$tipoSlug}/{$proveedorSlug}/{$anio}/{$mes}/{$nombreNormalizado}";
-        }
-
-        if ($documento->ruta && Storage::disk('public')->exists($documento->ruta)) {
-            Storage::disk('public')->delete($documento->ruta);
-        }
-
-        $rutaArchivo = $archivo->storeAs($ruta, $nombreFinal, 'public');
-        $posicionUltimoSlash = strrpos($rutaArchivo, '/');
-        $rutaArchivo = substr($rutaArchivo, 0, $posicionUltimoSlash);
-
-
-        $documento->ruta = $rutaArchivo;
-        //$documento->extension = $extension;
-        $documento->estado = DocumentoProveedor::ESTATUS_CARGADO;
-        $documento->fecha_carga = now();
-        $documento->save();
-
-        return response()->json([
-            'message' => 'Archivo subido correctamente.',
-            'ruta' => $rutaArchivo,
-        ], 200);
-    }
-
-    private function slugify($string)
-    {
-        $string = strtolower($string);
-        $string = str_replace(' ', '_', $string);
-        $string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
-        $string = preg_replace('/[^a-z0-9_]/', '', $string);
-        $string = str_replace('.', '', $string);
-        $string = preg_replace('/_+/', '_', $string);
-        $string = trim($string, '_');
-
-        return $string;
     }
 
     public function documentoDescargar($id, $unicaVez = null)
     {
-        if ($unicaVez === 'uv') {
-            $documento = DocumentoProveedorUnicaVez::findOrFail($id);
-        }else if ($unicaVez === null) {
-            $documento = DocumentoProveedor::findOrFail($id);
-        }else {
-            return back()->with('error', 'Error.');
+        try {
+            $respuesta = DocumentoService::descargarYComprimir($id, $unicaVez);
+        } catch (\InvalidArgumentException $e) {
+            return LogUsuarioService::logRespuesta([
+                'accion'      => LogUsuarioAccion::DESCARGAR_DOCUMENTO,
+                'descripcion' => 'Error al descargar documento (parámetro inválido)',
+                'respuesta'   => response()->json(['error' => 'Error al procesar la descarga.'], 400),
+            ]);
         }
 
-        $folderPath = storage_path("app/public/{$documento->ruta}");
-
-        $zipFileName = 'archivos_comprimidos.zip';
-        $zipFilePath = $folderPath . "/" . $zipFileName;
-
-        if (!File::exists($folderPath)) {
-            return response()->json(['error' => 'La carpeta no existe.'], 404);
-        }
-
-        $files = File::allFiles($folderPath);
-
-        if (count($files) === 0) {
-            return response()->json(['error' => 'La carpeta está vacía.'], 404);
-        }
-
-        $zip = new ZipArchive;
-
-        if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
-            $files = File::allFiles($folderPath);
-
-            foreach ($files as $file) {
-                $zip->addFile($file->getRealPath(), $file->getFilename());
-            }
-
-            $zip->close();
-
-            return response()->download($zipFilePath)->deleteFileAfterSend(true);
-        } else {
-            return response()->json(['error' => 'No se pudo crear el archivo zip.'], 500);
-        }
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::DESCARGAR_DOCUMENTO,
+            'descripcion' => "Descarga de documento ID {$id}" . ($unicaVez === 'uv' ? ' (única vez)' : ''),
+            'respuesta'   => $respuesta,
+        ]);
     }
+
     public function eliminarArchivo(Request $request)
     {
         $request->validate([
-            'ruta' => 'required|string',
-            'archivo' => 'required|string',
+            'ruta'   => 'required|string',
+            'archivo'=> 'required|string',
         ]);
 
-        $fullPath = storage_path("app/public/{$request->ruta}/{$request->archivo}");
+        $exito = DocumentoService::eliminarArchivo($request->ruta, $request->archivo);
 
-        if (File::exists($fullPath)) {
-            File::delete($fullPath);
-            return back()->with('success', 'Archivo eliminado correctamente.');
-        }
-
-        return back()->with('error', 'Archivo no encontrado.');
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::ELIMINAR_DOCUMENTO,
+            'descripcion' => "Eliminación de archivo: {$request->archivo} en ruta {$request->ruta}",
+            'respuesta'   => back()->with($exito ? 'success' : 'error', $exito ? 'Archivo eliminado correctamente.' : 'Archivo no encontrado.'),
+        ]);
     }
 
     public function generarZip(Request $request)
     {
-        $zip = new \ZipArchive();
-        $zipFileName = 'documentos.zip';
+        $administrador = Administrador::find($request->administrador_id);
+        $administradorSlugify = Util::slugify($administrador->nombre);
 
-        $zipPath = storage_path('app/public/' . $zipFileName);
+        GenerarZipDocumentos::dispatch($administradorSlugify);
 
-        $folderPath = storage_path('app/public/documentos');
-
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
-            $files = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($folderPath),
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-
-            foreach ($files as $name => $file) {
-                if (!$file->isDir()) {
-                    $filePath = $file->getRealPath();
-
-                    $relativePath = 'documentos/' . substr($filePath, strlen($folderPath) + 1);
-
-                    $zip->addFile($filePath, $relativePath);
-                }
-            }
-
-            $zip->close();
-
-            return response()->download($zipPath)->deleteFileAfterSend(true);
-        }
-
-        return response()->json(['error' => 'No se pudo crear el archivo ZIP'], 500);
+        return redirect()->route('admin.documentos.zip.esperando', ['nombre' => $administradorSlugify]);
     }
+
+
+    public function zipProgreso($nombre)
+    {
+        $nombre = Util::slugify($nombre);
+        $ruta = storage_path("app/zips/{$nombre}.zip");
+        return response()->json(['listo' => File::exists($ruta)]);
+    }
+
+
+    public function descargarZip($nombre)
+    {
+        $nombre = Util::slugify($nombre);
+        $ruta = storage_path("app/zips/{$nombre}.zip");
+
+        if (!File::exists($ruta)) abort(404);
+
+        return response()->download($ruta);
+    }
+
+    public function esperandoVista($nombre)
+    {
+        return view('esperando', compact('nombre'));
+    }
+
 }

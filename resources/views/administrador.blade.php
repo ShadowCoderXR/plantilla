@@ -85,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Modal para el primer caso (modalSeleccion) -->
     <div class="modal fade" id="modalSeleccion" tabindex="-1" aria-labelledby="modalSeleccionLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0 shadow-lg rounded-3">
@@ -105,6 +104,9 @@
                     </p>
                     <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
                         @csrf
+
+                        <input type="hidden" name="administrador_id" value="{{ $administrador->id }}">
+
                         <div id="grupoMes" class="mb-3" style="display: none;">
                             <label for="mesSeleccionado" class="form-label text-sm">Mes</label>
                             <select id="mesSeleccionado" class="form-select rounded-2 shadow-sm">
