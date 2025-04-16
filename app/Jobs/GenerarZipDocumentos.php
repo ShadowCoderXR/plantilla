@@ -70,11 +70,17 @@ class GenerarZipDocumentos implements ShouldQueue
         }
 
         $directorioZips = storage_path("app/zips");
+        $mesNombre = $this->tipo === 3 && $this->mes
+            ? Util::slugify(strtolower(Carbon::create()->month($this->mes)->locale('es')->translatedFormat('F')))
+            : null;
+
         $nombreZip = implode('-', array_filter([
             $this->admin,
             $this->cliente,
             $this->tipoDocumento,
-            $this->proveedor
+            $this->proveedor,
+            $this->tipo === 2 && $this->anio ? $this->anio : null,
+            $this->tipo === 3 && $this->anio && $mesNombre ? "{$this->anio}-{$mesNombre}" : null,
         ]));
 
         $zipFinal = "$directorioZips/{$nombreZip}.zip";
@@ -121,10 +127,6 @@ class GenerarZipDocumentos implements ShouldQueue
         Log::info("[ZIP] Creando nuevo ZIP...");
 
         if ($zip->open($zipFinal, \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
-            $mesNombre = $this->tipo === 3 && $this->mes
-                ? Util::slugify(strtolower(Carbon::create()->month($this->mes)->locale('es')->translatedFormat('F')))
-                : null;
-
             $iteradores = [
                 new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator($rutaBase, FilesystemIterator::SKIP_DOTS),
