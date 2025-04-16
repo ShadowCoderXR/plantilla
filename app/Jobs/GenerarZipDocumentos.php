@@ -127,6 +127,7 @@ class GenerarZipDocumentos implements ShouldQueue
         Log::info("[ZIP] Creando nuevo ZIP...");
 
         if ($zip->open($zipFinal, \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
+            $archivosAgregados = 0;
             $iteradores = [
                 new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator($rutaBase, FilesystemIterator::SKIP_DOTS),
@@ -152,10 +153,29 @@ class GenerarZipDocumentos implements ShouldQueue
                     if ($this->tipo === 3 && $this->anio && $mesNombre && !str_contains($relativePath, "{$this->anio}/{$mesNombre}/")) continue;
 
                     $zip->addFile($filePath, $relativePath);
+                    $archivosAgregados++;
                 }
             }
 
+            if ($archivosAgregados === 0) {
+                $mensaje = "No hay archivos disponibles para los parámetros seleccionados.";
+                $archivoTemporal = storage_path("app/temp-mensaje.txt");
+                File::put($archivoTemporal, $mensaje);
+                $zip->addFile($archivoTemporal, "{$this->admin}/{$this->cliente}/mensaje.txt");
+                Log::info("[ZIP] No se encontraron archivos, se agregó mensaje.txt");
+            }
+
             $zip->close();
+
+            if (!File::exists($zipFinal)) {
+                Log::error("[ZIP] Se intentó cerrar el ZIP pero no fue creado.");
+                Descarga::updateOrCreate(
+                    ['usuario_id' => $this->usuarioId, 'nombre' => $nombreZip, 'ruta' => $zipFinal],
+                    ['estado' => 'error']
+                );
+                return;
+            }
+
             Log::info("[ZIP] ZIP generado exitosamente");
 
             Descarga::updateOrCreate(
