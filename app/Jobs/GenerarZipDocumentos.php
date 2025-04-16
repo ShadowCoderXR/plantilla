@@ -56,6 +56,7 @@ class GenerarZipDocumentos implements ShouldQueue
         if ($this->proveedor) $baseRuta[] = $this->proveedor;
 
         $rutaBase = storage_path('app/public/' . implode('/', array_filter($baseRuta)));
+        $relativaDesde = storage_path('app/public/documentos');
         Log::info("[ZIP] Ruta base: $rutaBase");
 
         $rutaUnicaVezExtra = null;
@@ -143,7 +144,7 @@ class GenerarZipDocumentos implements ShouldQueue
                     if ($file->isDir()) continue;
 
                     $filePath = $file->getRealPath();
-                    $relativePath = str_replace(storage_path('app/public/documentos/') . '/', '', $filePath);
+                    $relativePath = substr($filePath, strlen($relativaDesde) + 1);
 
                     if ($this->tipo === 2 && $this->anio && !str_contains($relativePath, "{$this->anio}/")) continue;
                     if ($this->tipo === 3 && $this->anio && $mesNombre && !str_contains($relativePath, "{$this->anio}/{$mesNombre}/")) continue;
