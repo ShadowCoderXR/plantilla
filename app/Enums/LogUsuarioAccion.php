@@ -20,6 +20,13 @@ enum LogUsuarioAccion: string
     case PROVEEDORES = 'proveedores';
     case DOCUMENTOS = 'documentos';
 
+    // Zip
+
+    case GENERAR_ZIP = 'generar_zip';
+    case VER_DESCARGAS_ZIP = 'ver_descargas_zip';
+    case DESCARGAR_ZIP = 'descargar_zip';
+    case ELIMINAR_ZIP = 'eliminar_zip';
+
     public function tipo(): string
     {
         return match($this) {
@@ -33,6 +40,10 @@ enum LogUsuarioAccion: string
             self::CLIENTE,
             self::PROVEEDORES,
             self::DOCUMENTOS => 'navegacion',
+            self::GENERAR_ZIP,
+            self::VER_DESCARGAS_ZIP,
+            self::DESCARGAR_ZIP,
+            self::ELIMINAR_ZIP => 'zip',
         };
     }
 }

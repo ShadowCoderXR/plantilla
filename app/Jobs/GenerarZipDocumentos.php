@@ -74,14 +74,20 @@ class GenerarZipDocumentos implements ShouldQueue
             ? Util::slugify(strtolower(Carbon::create()->month($this->mes)->locale('es')->translatedFormat('F')))
             : null;
 
-        $nombreZip = implode('-', array_filter([
-            $this->admin,
+        $hashComponentes = implode('|', array_filter([
             $this->cliente,
             $this->tipoDocumento,
             $this->proveedor,
-            $this->tipo === 2 && $this->anio ? $this->anio : null,
-            $this->tipo === 3 && $this->anio && $mesNombre ? "{$this->anio}-{$mesNombre}" : null,
+            $this->tipo === 2 ? $this->anio : null,
+            $this->tipo === 3 ? ($this->anio . '-' . $mesNombre) : null,
         ]));
+        $hash = substr(sha1($hashComponentes), 0, 8);
+
+        $nombreZip = implode('-', array_filter([
+                $this->admin,
+                $this->tipo === 2 && $this->anio ? $this->anio : null,
+                $this->tipo === 3 && $this->anio && $mesNombre ? $this->anio . '-' . $mesNombre : null,
+            ])) . '-' . $hash;
 
         $zipFinal = "$directorioZips/{$nombreZip}.zip";
         Log::info("[ZIP] Nombre del ZIP: $zipFinal");

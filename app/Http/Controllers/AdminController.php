@@ -18,6 +18,7 @@ use App\Models\TipoDocumento;
 use App\Services\DocumentoService;
 use App\Services\LogUsuarioService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
@@ -189,7 +190,9 @@ class AdminController extends Controller
         return LogUsuarioService::logRespuesta([
             'accion'      => LogUsuarioAccion::ELIMINAR_DOCUMENTO,
             'descripcion' => "Eliminación de archivo: {$request->archivo} en ruta {$request->ruta}",
-            'respuesta'   => back()->with($exito ? 'success' : 'error', $exito ? 'Archivo eliminado correctamente.' : 'Archivo no encontrado.'),
+            'respuesta'   => back()->with(
+                $exito ? 'success' : 'error',
+                $exito ? 'Archivo eliminado correctamente.' : 'Archivo no encontrado.'),
         ]);
     }
 
@@ -200,51 +203,75 @@ class AdminController extends Controller
         $anio   = $request->input('anio');
         $mes    = $request->input('mes');
 
+        $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
+
         if ($origen === 'proveedor') {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $cliente       = Cliente::findOrFail($request->cliente_id);
             $proveedor     = Proveedor::findOrFail($request->proveedor_id);
             $tipoDocumento = TipoDocumento::findOrFail($request->tipoDocumento_id);
 
-            $adminSlug   = Util::slugify($administrador->nombre);
-            $clienteSlug = Util::slugify($cliente->nombre);
+            $adminSlug     = Util::slugify($administrador->nombre);
+            $clienteSlug   = Util::slugify($cliente->nombre);
             $proveedorSlug = Util::slugify($proveedor->nombre);
-            $tipoSlug = Util::slugify($tipoDocumento->nombre);
-
-            GenerarZipDocumentos::dispatch(
-                auth()->id(),
-                $adminSlug,
-                $clienteSlug,
-                $tipo,
-                $anio,
-                $mes,
-                $tipoSlug,
-                $proveedorSlug
-            );
-
-            $nombreFinal = "{$adminSlug}-{$clienteSlug}-{$tipoSlug}-{$proveedorSlug}";
-        }
-
-        elseif ($origen === 'cliente') {
+            $tipoSlug      = Util::slugify($tipoDocumento->nombre);
+        } elseif ($origen === 'cliente') {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $cliente       = Cliente::findOrFail($request->cliente_id);
 
             $adminSlug   = Util::slugify($administrador->nombre);
             $clienteSlug = Util::slugify($cliente->nombre);
-
-            GenerarZipDocumentos::dispatch(auth()->id(), $adminSlug, $clienteSlug, $tipo, $anio, $mes);
-            $nombreFinal = "{$adminSlug}-{$clienteSlug}";
-        }
-
-        else {
+        } else {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $adminSlug     = Util::slugify($administrador->nombre);
-
-            GenerarZipDocumentos::dispatch(auth()->id(), $adminSlug, null, $tipo, $anio, $mes);
-            $nombreFinal = $adminSlug;
         }
 
-        return redirect()->route('admin.documentos.descargas');
+        // Construcción anticipada del nombre del ZIP
+        $mesNombre = $tipo === 3 && $mes
+            ? Util::slugify(strtolower(Carbon::create()->month($mes)->locale('es')->translatedFormat('F')))
+            : null;
+
+        $hashComponentes = implode('|', array_filter([
+            $clienteSlug,
+            $tipoSlug,
+            $proveedorSlug,
+            $tipo === 2 ? $anio : null,
+            $tipo === 3 ? ($anio . '-' . $mesNombre) : null,
+        ]));
+
+        $hash = substr(sha1($hashComponentes), 0, 8);
+
+        $nombreZip = implode('-', array_filter([
+                $adminSlug,
+                $tipo === 2 && $anio ? $anio : null,
+                $tipo === 3 && $anio && $mesNombre ? $anio . '-' . $mesNombre : null,
+            ])) . '-' . $hash;
+
+        $zipFinal = storage_path("app/zips/{$nombreZip}.zip");
+
+        // Aquí registramos de inmediato
+        Descarga::updateOrCreate(
+            ['usuario_id' => auth()->id(), 'nombre' => $nombreZip, 'ruta' => $zipFinal],
+            ['estado' => 'en_proceso']
+        );
+
+        // Despachamos el job
+        GenerarZipDocumentos::dispatch(
+            auth()->id(),
+            $adminSlug,
+            $clienteSlug,
+            $tipo,
+            $anio,
+            $mes,
+            $tipoSlug,
+            $proveedorSlug
+        );
+
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::GENERAR_ZIP,
+            'descripcion' => "Generación de ZIP desde $origen",
+            'redireccion' => 'admin.documentos.descargas',
+        ]);
     }
 
     public function descargas()
@@ -253,25 +280,33 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('descargas', compact('descargas'));
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::VER_DESCARGAS_ZIP,
+            'descripcion' => 'Acceso a la vista de descargas',
+            'vista'       => 'descargas',
+            'data'        => compact('descargas'),
+        ]);
     }
 
     public function zipProgreso($nombre)
     {
         $descarga = Descarga::where('nombre', $nombre)->latest()->first();
 
-        if (!$descarga) {
-            return response()->json(['estado' => 'no_encontrado']);
-        }
+        $respuesta = !$descarga
+            ? ['estado' => 'no_encontrado']
+            : [
+                'estado'  => $descarga->estado,
+                'ruta'    => $descarga->ruta,
+                'tamaño'  => $descarga->tamaño,
+                'listo'   => $descarga->estado === 'completado'
+            ];
 
-        return response()->json([
-            'estado'  => $descarga->estado,
-            'ruta'    => $descarga->ruta,
-            'tamaño'  => $descarga->tamaño,
-            'listo'   => $descarga->estado === 'completado'
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::DESCARGAR_ZIP,
+            'descripcion' => "Consulta de progreso para ZIP: $nombre",
+            'respuesta'   => response()->json($respuesta),
         ]);
     }
-
 
     public function descargarZip($nombre)
     {
@@ -279,6 +314,10 @@ class AdminController extends Controller
 
         if (!File::exists($ruta)) abort(404);
 
-        return response()->download($ruta);
+        return LogUsuarioService::logRespuesta([
+            'accion'      => LogUsuarioAccion::DESCARGAR_ZIP,
+            'descripcion' => "Descarga del ZIP: $nombre",
+            'respuesta'   => response()->download($ruta),
+        ]);
     }
 }

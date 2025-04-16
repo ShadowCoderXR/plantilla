@@ -14,6 +14,7 @@ class LogUsuarioService
         $accion      = $params['accion'] ?? null;
         $descripcion = $params['descripcion'] ?? null;
         $respuesta   = $params['respuesta'] ?? null;
+        $redireccion = $params['redireccion'] ?? null;
         $vista       = $params['vista'] ?? null;
         $data        = $params['data'] ?? [];
 
@@ -25,6 +26,7 @@ class LogUsuarioService
 
         return match (true) {
             !is_null($respuesta) => $respuesta,
+            !is_null($redireccion) => redirect()->route($redireccion, $data),
             !is_null($vista)     => view($vista, $data),
             default              => throw new \InvalidArgumentException('Se requiere al menos "respuesta" o "vista".')
         };
