@@ -21,13 +21,13 @@ class Usuario extends Model implements AuthenticatableContract
         'contrasena',
     ];
 
-    public function getAuthIdentifierName()
-    {
-        return 'correo';
-    }
-
     public function getAuthPassword()
     {
         return $this->contrasena;
+    }
+
+    public function descargas()
+    {
+        return $this->hasMany(Descarga::class, 'usuario_id');
     }
 }

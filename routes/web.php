@@ -31,7 +31,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/documentos/zip-progreso/{nombre}', [AdminController::class, 'zipProgreso'])->name('documentos.zip.progreso');
     Route::get('/documentos/descargar/{nombre}', [AdminController::class, 'descargarZip'])->name('documentos.zip.descargar');
     Route::get('/documentos/esperando/{nombre}', [AdminController::class, 'esperandoVista'])->name('documentos.zip.esperando');
-
+    Route::get('/documentos/descargas', [AdminController::class, 'descargas'])->name('documentos.descargas');
 
 });
 

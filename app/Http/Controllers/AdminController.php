@@ -8,6 +8,7 @@ use App\Jobs\GenerarZipDocumentos;
 use App\Models\Administrador;
 use App\Models\Cliente;
 use App\Models\ClienteProveedor;
+use App\Models\Descarga;
 use App\Models\Documento;
 use App\Models\DocumentoMatriz;
 use App\Models\DocumentoProveedor;
@@ -194,7 +195,6 @@ class AdminController extends Controller
 
     public function generarZip(Request $request)
     {
-        dd($request->all());
         $origen = $request->input('origen', 'administrador');
         $tipo   = (int) $request->input('tipo', 1);
         $anio   = $request->input('anio');
@@ -212,6 +212,7 @@ class AdminController extends Controller
             $tipoSlug = Util::slugify($tipoDocumento->nombre);
 
             GenerarZipDocumentos::dispatch(
+                auth()->id(),
                 $adminSlug,
                 $clienteSlug,
                 $tipo,
@@ -231,7 +232,7 @@ class AdminController extends Controller
             $adminSlug   = Util::slugify($administrador->nombre);
             $clienteSlug = Util::slugify($cliente->nombre);
 
-            GenerarZipDocumentos::dispatch($adminSlug, $clienteSlug, $tipo, $anio, $mes);
+            GenerarZipDocumentos::dispatch(auth()->id(), $adminSlug, $clienteSlug, $tipo, $anio, $mes);
             $nombreFinal = "{$adminSlug}-{$clienteSlug}";
         }
 
@@ -239,20 +240,36 @@ class AdminController extends Controller
             $administrador = Administrador::findOrFail($request->administrador_id);
             $adminSlug     = Util::slugify($administrador->nombre);
 
-            GenerarZipDocumentos::dispatch($adminSlug, null, $tipo, $anio, $mes);
+            GenerarZipDocumentos::dispatch(auth()->id(), $adminSlug, null, $tipo, $anio, $mes);
             $nombreFinal = $adminSlug;
         }
 
-        return redirect()->route('admin.documentos.zip.esperando', ['nombre' => $nombreFinal]);
+        return redirect()->route('admin.documentos.descargas');
     }
 
+    public function descargas()
+    {
+        $descargas = Descarga::where('usuario_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
+        return view('descargas', compact('descargas'));
+    }
 
     public function zipProgreso($nombre)
     {
-        Log::info("Procesando zip progreso $nombre");
-        $ruta = storage_path("app/zips/{$nombre}.zip");
-        return response()->json(['listo' => File::exists($ruta)]);
+        $descarga = Descarga::where('nombre', $nombre)->latest()->first();
+
+        if (!$descarga) {
+            return response()->json(['estado' => 'no_encontrado']);
+        }
+
+        return response()->json([
+            'estado'  => $descarga->estado,
+            'ruta'    => $descarga->ruta,
+            'tamaño'  => $descarga->tamaño,
+            'listo'   => $descarga->estado === 'completado'
+        ]);
     }
 
 
@@ -264,10 +281,4 @@ class AdminController extends Controller
 
         return response()->download($ruta);
     }
-
-    public function esperandoVista($nombre)
-    {
-        return view('esperando', compact('nombre'));
-    }
-
 }

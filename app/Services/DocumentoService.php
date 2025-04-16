@@ -178,10 +178,6 @@ class DocumentoService
         $anio      = $documento->anio;
         $mes       = $documento->mes;
 
-        if ($tipoSlug !== $grupoSlug) {
-            $tipoSlug = $grupoSlug;
-        }
-
         $nombreDocumento = $documento->documento->nombre ?? 'documento';
 
         $padre = str_contains($nombreDocumento, '- ISR') ? 'declaraciones_mensuales_retenciones_isr'
@@ -189,6 +185,11 @@ class DocumentoService
 
         $subcarpeta = Util::slugify($nombreDocumento);
         $nombreNormalizado = $padre ? "{$padre}/{$subcarpeta}" : $subcarpeta;
+
+        if ($tipoSlug !== $grupoSlug) {
+            $nombreNormalizado = "{$grupoSlug}/{$nombreNormalizado}";
+        }
+
         $nombreFinal = $archivo->getClientOriginalName();
 
         $ruta = $documento->documento->informacion === 'Documento única vez'

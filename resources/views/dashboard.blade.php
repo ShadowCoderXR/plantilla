@@ -16,7 +16,7 @@
         <div class="row gx-4">
             <div class="col">
                 <div class="h-100 text-center text-md-start">
-                    <h4 class="mb-1">Administradores</h3>
+                    <h4 class="mb-1">Administradores</h4>
                     <p class="mb-0 text-sm text-muted">Gestión y administración de usuarios con privilegios avanzados.</p>
                 </div>
             </div>
@@ -34,7 +34,7 @@
             <h5>Administradores</h5>
             <p class="mb-0">Lista de administradores que gestionan la plataforma y sus respectivos clientes.</p>
         </div>
-    </div> 
+    </div>
     -->
     <div class="row mt-lg-4 mt-2">
         @forelse($administradores as $administrador)
