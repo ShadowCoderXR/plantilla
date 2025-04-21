@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
             $table->string('nombre');
             $table->string('ruta');
+            $table->string('informacion')->nullable();
             $table->enum('estado', ['en_proceso', 'completado', 'error', 'eliminado'])->default('en_proceso');
             $table->string('tamaño')->default('0');
             $table->timestamps();

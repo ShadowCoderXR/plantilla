@@ -57,15 +57,12 @@ class GenerarZipDocumentos implements ShouldQueue
 
         $rutaBase = storage_path('app/public/' . implode('/', array_filter($baseRuta)));
         $relativaDesde = storage_path('app/public/documentos');
-        Log::info("[ZIP] Ruta base: $rutaBase");
 
         $rutaUnicaVezExtra = null;
         if ($this->tipoDocumento !== 'repse' && $this->cliente && $this->proveedor) {
             $rutaPosible = storage_path("app/public/documentos/{$this->admin}/{$this->cliente}/repse/{$this->proveedor}/única_vez");
-            Log::info("[ZIP] Revisando ruta única vez: $rutaPosible");
             if (File::exists($rutaPosible)) {
                 $rutaUnicaVezExtra = $rutaPosible;
-                Log::info("[ZIP] Ruta única vez encontrada");
             }
         }
 
@@ -86,14 +83,12 @@ class GenerarZipDocumentos implements ShouldQueue
         $nombreZip = implode('-', array_filter([
                 $this->admin,
                 $this->tipo === 2 && $this->anio ? $this->anio : null,
-                $this->tipo === 3 && $this->anio && $mesNombre ? $this->anio . '-' . $mesNombre : null,
+                $this->tipo === 3 && $this->anio && $mesNombre ? "{$this->anio}-{$mesNombre}" : null,
             ])) . '-' . $hash;
 
         $zipFinal = "$directorioZips/{$nombreZip}.zip";
-        Log::info("[ZIP] Nombre del ZIP: $zipFinal");
 
         if (!File::exists($rutaBase)) {
-            Log::warning("[ZIP] No se encontró la carpeta a comprimir: {$rutaBase}");
             Descarga::updateOrCreate(
                 ['usuario_id' => $this->usuarioId, 'nombre' => $nombreZip, 'ruta' => $zipFinal],
                 ['estado' => 'error']
@@ -116,10 +111,8 @@ class GenerarZipDocumentos implements ShouldQueue
             ->merge($rutaUnicaVezExtra ? File::allFiles($rutaUnicaVezExtra) : []);
 
         $modificados = $archivos->filter(fn($f) => $zipModTime === null || $f->getMTime() > $zipModTime);
-        Log::info("[ZIP] Archivos modificados: {$modificados->count()}");
 
         if ($descarga && $modificados->isEmpty() && File::exists($zipFinal)) {
-            Log::info("[ZIP] No hay cambios. Se mantiene ZIP actual");
             $descarga->update([
                 'estado' => 'completado',
                 'tamaño' => File::size($zipFinal),
@@ -130,7 +123,6 @@ class GenerarZipDocumentos implements ShouldQueue
 
         File::delete($zipFinal);
         $zip = new \ZipArchive();
-        Log::info("[ZIP] Creando nuevo ZIP...");
 
         if ($zip->open($zipFinal, \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
             $archivosAgregados = 0;
@@ -168,13 +160,11 @@ class GenerarZipDocumentos implements ShouldQueue
                 $archivoTemporal = storage_path("app/temp-mensaje.txt");
                 File::put($archivoTemporal, $mensaje);
                 $zip->addFile($archivoTemporal, "{$this->admin}/{$this->cliente}/mensaje.txt");
-                Log::info("[ZIP] No se encontraron archivos, se agregó mensaje.txt");
             }
 
             $zip->close();
 
             if (!File::exists($zipFinal)) {
-                Log::error("[ZIP] Se intentó cerrar el ZIP pero no fue creado.");
                 Descarga::updateOrCreate(
                     ['usuario_id' => $this->usuarioId, 'nombre' => $nombreZip, 'ruta' => $zipFinal],
                     ['estado' => 'error']
@@ -182,14 +172,11 @@ class GenerarZipDocumentos implements ShouldQueue
                 return;
             }
 
-            Log::info("[ZIP] ZIP generado exitosamente");
-
             Descarga::updateOrCreate(
                 ['usuario_id' => $this->usuarioId, 'nombre' => $nombreZip, 'ruta' => $zipFinal],
                 ['estado' => 'completado', 'tamaño' => File::size($zipFinal)]
             );
         } else {
-            Log::error("[ZIP] No se pudo abrir el archivo ZIP en: {$zipFinal}");
             Descarga::updateOrCreate(
                 ['usuario_id' => $this->usuarioId, 'nombre' => $nombreZip, 'ruta' => $zipFinal],
                 ['estado' => 'error']

@@ -12,6 +12,7 @@ class Descarga extends Model
         'ruta',
         'estado',
         'tamaño',
+        'informacion',
     ];
 
     protected $casts = [

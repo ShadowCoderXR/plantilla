@@ -18,6 +18,7 @@
                             <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Información</th> {{-- nueva columna --}}
                                 <th>Estado</th>
                                 <th>Tamaño</th>
                                 <th>Fecha</th>
@@ -28,6 +29,9 @@
                             @foreach($descargas as $descarga)
                                 <tr data-nombre="{{ $descarga->nombre }}">
                                     <td class="text-sm">{{ $descarga->nombre }}</td>
+                                    <td class="text-sm">
+                                        {{ $descarga->informacion ?? '—' }}
+                                    </td>
                                     <td>
                                         <span class="badge bg-gradient-{{
                                             $descarga->estado === 'completado' ? 'success' :
@@ -37,7 +41,7 @@
                                         </span>
                                     </td>
                                     <td class="text-sm">{{ $descarga->tamaño ? number_format($descarga->tamaño / 1024 / 1024, 2) . ' MB' : '—' }}</td>
-                                    <td class="text-sm">{{ $descarga->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="text-sm">{{ $descarga->updated_at->format('d/m/Y H:i') }}</td>
                                     <td>
                                         @if($descarga->estado === 'completado')
                                             <a href="{{ route('admin.documentos.zip.descargar', $descarga->nombre) }}" class="btn btn-sm btn-outline-success">
@@ -62,7 +66,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             new simpleDatatables.DataTable("#tabla-descargas", {
-                searchable: true,
+                searchable: false,
+                sortable: false,
                 fixedHeight: true
             });
         });
@@ -75,47 +80,40 @@
             function actualizarProgreso() {
                 const filas = document.querySelectorAll('#tabla-descargas tbody tr');
                 let hayPendientes = false;
+                let debeRecargar = false;
 
-                filas.forEach(fila => {
+                const promesas = Array.from(filas).map(fila => {
                     const nombre = fila.dataset.nombre;
-                    const estadoBadge = fila.querySelector('td:nth-child(2) span');
-                    const tamanoCelda = fila.querySelector('td:nth-child(3)');
-                    const accionesCelda = fila.querySelector('td:nth-child(5)');
+                    const estadoBadge = fila.querySelector('td:nth-child(3) span');
 
                     if (estadoBadge && estadoBadge.textContent.toLowerCase().includes('proceso')) {
                         hayPendientes = true;
 
-                        fetch(`/documentos/zip-progreso/${nombre}`)
+                        return fetch(`/admin/documentos/zip-progreso/${nombre}`)
                             .then(res => res.json())
                             .then(data => {
                                 if (!data || data.estado === 'no_encontrado') return;
 
-                                estadoBadge.textContent = data.estado.charAt(0).toUpperCase() + data.estado.slice(1);
-                                estadoBadge.className = 'badge bg-gradient-' + (
-                                    data.estado === 'completado' ? 'success' :
-                                        data.estado === 'en_proceso' ? 'warning' : 'danger'
-                                );
-
-                                tamanoCelda.textContent = data.tamaño
-                                    ? (parseFloat(data.tamaño) / 1024 / 1024).toFixed(2) + ' MB'
-                                    : '—';
-
                                 if (data.estado === 'completado') {
-                                    accionesCelda.innerHTML = `
-                                        <a href="/admin/documentos/zip/descargar/${nombre}" class="btn btn-sm btn-outline-success">
-                                            <i class="fa fa-download me-1"></i> Descargar
-                                        </a>
-                                    `;
+                                    debeRecargar = true;
                                 }
                             })
                             .catch(error => console.error("Error actualizando progreso:", error));
                     }
+
+                    return Promise.resolve();
                 });
 
-                if (!hayPendientes && intervalId) {
-                    clearInterval(intervalId);
-                    intervalId = null;
-                }
+                Promise.all(promesas).then(() => {
+                    if (debeRecargar) {
+                        location.reload();
+                    }
+
+                    if (!hayPendientes && intervalId) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                });
             }
 
             intervalId = setInterval(actualizarProgreso, 3000);

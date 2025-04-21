@@ -205,6 +205,8 @@ class AdminController extends Controller
 
         $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
 
+        $descripcionInfo = "Origen: " . ucfirst($origen);
+
         if ($origen === 'proveedor') {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $cliente       = Cliente::findOrFail($request->cliente_id);
@@ -215,20 +217,23 @@ class AdminController extends Controller
             $clienteSlug   = Util::slugify($cliente->nombre);
             $proveedorSlug = Util::slugify($proveedor->nombre);
             $tipoSlug      = Util::slugify($tipoDocumento->nombre);
+
+            $descripcionInfo .= " | Cliente: {$cliente->nombre} | Proveedor: {$proveedor->nombre} | Documento: {$tipoDocumento->nombre}";
         } elseif ($origen === 'cliente') {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $cliente       = Cliente::findOrFail($request->cliente_id);
 
             $adminSlug   = Util::slugify($administrador->nombre);
             $clienteSlug = Util::slugify($cliente->nombre);
+
+            $descripcionInfo .= " | Cliente: {$cliente->nombre}";
         } else {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $adminSlug     = Util::slugify($administrador->nombre);
         }
 
-        // Construcción anticipada del nombre del ZIP
         $mesNombre = $tipo === 3 && $mes
-            ? Util::slugify(strtolower(Carbon::create()->month($mes)->locale('es')->translatedFormat('F')))
+            ? Util::slugify(strtolower(Carbon::createFromDate(null, (int) $mes)->locale('es')->translatedFormat('F')))
             : null;
 
         $hashComponentes = implode('|', array_filter([
@@ -249,13 +254,11 @@ class AdminController extends Controller
 
         $zipFinal = storage_path("app/zips/{$nombreZip}.zip");
 
-        // Aquí registramos de inmediato
         Descarga::updateOrCreate(
             ['usuario_id' => auth()->id(), 'nombre' => $nombreZip, 'ruta' => $zipFinal],
-            ['estado' => 'en_proceso']
+            ['estado' => 'en_proceso', 'informacion' => $descripcionInfo]
         );
 
-        // Despachamos el job
         GenerarZipDocumentos::dispatch(
             auth()->id(),
             $adminSlug,
@@ -277,7 +280,7 @@ class AdminController extends Controller
     public function descargas()
     {
         $descargas = Descarga::where('usuario_id', auth()->id())
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return LogUsuarioService::logRespuesta([
