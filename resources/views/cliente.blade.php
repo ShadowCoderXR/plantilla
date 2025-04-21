@@ -104,7 +104,7 @@
                     <p id="mensajeConfirmacion" class="text-center text-secondary small my-3">
                         Se descargarán los documentos de todos los clientes y proveedores del periodo seleccionado.
                     </p>
-                    <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
+                    <form id="formSeleccion" method="POST" action="{{ route('admin.documentos.zip') }}">
                         @csrf
 
                         <input type="hidden" name="administrador_id" value="{{ $cliente->administradores->first()->id }}">

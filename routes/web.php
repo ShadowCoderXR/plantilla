@@ -34,5 +34,3 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/documentos/descargas', [AdminController::class, 'descargas'])->name('documentos.descargas');
 
 });
-
-Route::post('/descargar-documentos', [AdminController::class, 'generarZip'])->name('documentos.zip');

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ZipArchive;
 
 class GenerarZipDocumentos implements ShouldQueue
 {
@@ -106,13 +107,35 @@ class GenerarZipDocumentos implements ShouldQueue
             ->latest()
             ->first();
 
-        $zipModTime = File::exists($zipFinal) ? filemtime($zipFinal) : null;
-        $archivos = collect(File::allFiles($rutaBase))
-            ->merge($rutaUnicaVezExtra ? File::allFiles($rutaUnicaVezExtra) : []);
+        $archivosActuales = collect(File::allFiles($rutaBase))
+            ->merge($rutaUnicaVezExtra ? File::allFiles($rutaUnicaVezExtra) : [])
+            ->mapWithKeys(function ($file) use ($relativaDesde) {
+                $path = $file->getRealPath();
+                $rel = substr($path, strlen($relativaDesde) + 1);
+                return [$rel => $file->getMTime()];
+            });
 
-        $modificados = $archivos->filter(fn($f) => $zipModTime === null || $f->getMTime() > $zipModTime);
+        $archivosZip = collect();
+        if (File::exists($zipFinal)) {
+            $zip = new ZipArchive();
+            if ($zip->open($zipFinal) === true) {
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $stat = $zip->statIndex($i);
+                    if (!$stat) continue;
+                    $archivosZip[$stat['name']] = $stat['mtime'] ?? 0;
+                }
+                $zip->close();
+            }
+        }
 
-        if ($descarga && $modificados->isEmpty() && File::exists($zipFinal)) {
+        $archivosModificados = $archivosActuales->filter(function ($mtime, $path) use ($archivosZip) {
+            return !isset($archivosZip[$path]) || $archivosZip[$path] < $mtime;
+        });
+
+        $archivosEliminados = $archivosZip->keys()->diff($archivosActuales->keys());
+
+        if ($archivosModificados->isEmpty() && $archivosEliminados->isEmpty() && File::exists($zipFinal)) {
+            Log::info("[ZIP] Sin cambios detectados, se mantiene ZIP actual");
             $descarga->update([
                 'estado' => 'completado',
                 'tamaño' => File::size($zipFinal),

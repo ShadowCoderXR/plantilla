@@ -103,7 +103,7 @@
                     <p id="mensajeConfirmacion" class="text-center text-secondary small my-3">
                         Se descargarán los documentos de todos los clientes y proveedores del periodo seleccionado.
                     </p>
-                    <form id="formSeleccion" method="POST" action="{{ route('documentos.zip') }}">
+                    <form id="formSeleccion" method="POST" action="{{ route('admin.documentos.zip') }}">
                         @csrf
 
                         <input type="hidden" name="administrador_id" value="{{ $administrador->id }}">
@@ -126,6 +126,11 @@
                                 <option value="{{ $anio }}">{{ $anio }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div class="form-check form-switch d-flex align-items-center mb-3">
+                            <input class="form-check-input me-2" type="checkbox" role="switch" id="switchUnicaVez" name="opcionunicavez" value="1">
+                            <label class="form-check-label small text-muted" for="switchUnicaVez">Incluir carpeta "única vez"</label>
                         </div>
 
                         <div class="text-center">

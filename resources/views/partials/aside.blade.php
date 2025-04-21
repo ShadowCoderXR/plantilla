@@ -36,12 +36,12 @@
                 </a>
                 <div class="collapse show" id="dashboardsExamples">
                     <ul class="nav ms-4 ps-3">
-                        <li class="nav-item {{request()->routeIs('admin.*') ? 'active' : '' }}">
-                            <a aria-expanded="true" class="nav-link active" data-bs-toggle="collapse" href="#Examples">
+                        <li class="nav-item {{ !request()->routeIs('admin.documentos.*') ? 'active' : '' }}">
+                            <a aria-expanded="{{ !request()->routeIs('admin.documentos.*') ? 'true' : '' }}" class="nav-link {{ !request()->routeIs('admin.documentos.*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#Examples">
                                 <span class="sidenav-mini-icon"> A </span>
                                 <span class="sidenav-normal"> Administrador <b class="caret"></b></span>
                             </a>
-                            <div class="collapse show" id="Examples">
+                            <div class="collapse {{ !request()->routeIs('admin.documentos.*') ? 'show' : '' }}" id="Examples">
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
@@ -83,6 +83,14 @@
                                     @endif
                                 </ul>
                             </div>
+                        </li>
+                    </ul>
+                    <ul class="nav ms-4 ps-3">
+                        <li class="nav-item">
+                            <a class="nav-link {{request()->routeIs('admin.documentos.*') ? 'active' : '' }}" href="{{ route('admin.documentos.descargas') }}">
+                                <span class="sidenav-mini-icon"> D </span>
+                                <span class="sidenav-normal"> Descargas <b class="caret"></b></span>
+                            </a>
                         </li>
                     </ul>
                 </div>
