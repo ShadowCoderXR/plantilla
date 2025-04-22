@@ -203,6 +203,8 @@ class AdminController extends Controller
         $anio   = $request->input('anio');
         $mes    = $request->input('mes');
         $incluirUnicaVez = $request->filled('opcionunicavez');
+        Log::info("request: " . json_encode($request->all()));
+        Log::info("incluirUnicaVez controlador: " . ($incluirUnicaVez ? 'Sí' : 'No') . " - Valor: {$incluirUnicaVez}");
 
         $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
 

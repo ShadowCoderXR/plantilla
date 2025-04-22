@@ -26,6 +26,7 @@ class GenerarZipDocumentos implements ShouldQueue
     protected ?int $mes;
     protected ?string $tipoDocumento;
     protected ?string $proveedor;
+    protected bool $incluirUnicaVez;
 
     public function __construct(
         int $usuarioId,
@@ -35,7 +36,8 @@ class GenerarZipDocumentos implements ShouldQueue
         ?int $anio = null,
         ?int $mes = null,
         ?string $tipoDocumento = null,
-        ?string $proveedor = null
+        ?string $proveedor = null,
+        bool $incluirUnicaVez = false
     ) {
         $this->usuarioId = $usuarioId;
         $this->admin = $admin;
@@ -45,11 +47,13 @@ class GenerarZipDocumentos implements ShouldQueue
         $this->mes = $mes;
         $this->tipoDocumento = $tipoDocumento;
         $this->proveedor = $proveedor;
+        $this->incluirUnicaVez = $incluirUnicaVez;
     }
 
     public function handle(): void
     {
         Log::info("[ZIP] Iniciando job para usuario ID: {$this->usuarioId}");
+        Log::info("Incluir única vez: " . ($this->incluirUnicaVez ? 'Sí' : 'No') . " - Valor: {$this->incluirUnicaVez}");
 
         $baseRuta = ["documentos", $this->admin];
         if ($this->cliente) $baseRuta[] = $this->cliente;
@@ -100,6 +104,7 @@ class GenerarZipDocumentos implements ShouldQueue
             ->first();
 
         $archivosActuales = collect(File::allFiles($rutaBase))
+            ->reject(fn($file) => !$this->incluirUnicaVez && str_contains($file->getRealPath(), '/única_vez'))
             ->mapWithKeys(function ($file) use ($relativaDesde) {
                 $path = $file->getRealPath();
                 $rel = substr($path, strlen($relativaDesde) + 1);
@@ -147,6 +152,7 @@ class GenerarZipDocumentos implements ShouldQueue
 
             foreach ($iterator as $file) {
                 if ($file->isDir()) continue;
+                if (!$this->incluirUnicaVez && str_contains($file->getRealPath(), '/única_vez')) continue;
 
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($relativaDesde) + 1);
