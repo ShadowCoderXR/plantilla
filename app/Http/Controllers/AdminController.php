@@ -203,11 +203,8 @@ class AdminController extends Controller
         $anio   = $request->input('anio');
         $mes    = $request->input('mes');
         $incluirUnicaVez = $request->filled('opcionunicavez');
-        Log::info("request: " . json_encode($request->all()));
-        Log::info("incluirUnicaVez controlador: " . ($incluirUnicaVez ? 'Sí' : 'No') . " - Valor: {$incluirUnicaVez}");
 
         $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
-
         $descripcionInfo = "Origen: " . ucfirst($origen);
 
         if ($origen === 'proveedor') {
@@ -245,6 +242,7 @@ class AdminController extends Controller
             $proveedorSlug,
             $tipo === 2 ? $anio : null,
             $tipo === 3 ? ($anio . '-' . $mesNombre) : null,
+            $incluirUnicaVez ? 'incluirUnicaVez' : null,
         ]));
 
         $hash = substr(sha1($hashComponentes), 0, 8);
@@ -256,6 +254,10 @@ class AdminController extends Controller
             ])) . '-' . $hash;
 
         $zipFinal = storage_path("app/zips/{$nombreZip}.zip");
+
+        if ($incluirUnicaVez) {
+            $descripcionInfo .= " | Incluye 'única_vez'";
+        }
 
         Descarga::updateOrCreate(
             ['usuario_id' => auth()->id(), 'nombre' => $nombreZip, 'ruta' => $zipFinal],

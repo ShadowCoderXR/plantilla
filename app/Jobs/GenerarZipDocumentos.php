@@ -53,7 +53,6 @@ class GenerarZipDocumentos implements ShouldQueue
     public function handle(): void
     {
         Log::info("[ZIP] Iniciando job para usuario ID: {$this->usuarioId}");
-        Log::info("Incluir única vez: " . ($this->incluirUnicaVez ? 'Sí' : 'No') . " - Valor: {$this->incluirUnicaVez}");
 
         $baseRuta = ["documentos", $this->admin];
         if ($this->cliente) $baseRuta[] = $this->cliente;
@@ -74,6 +73,7 @@ class GenerarZipDocumentos implements ShouldQueue
             $this->proveedor,
             $this->tipo === 2 ? $this->anio : null,
             $this->tipo === 3 ? ($this->anio . '-' . $mesNombre) : null,
+            $this->incluirUnicaVez ? 'incluirUnicaVez' : null,
         ]));
         $hash = substr(sha1($hashComponentes), 0, 8);
 
@@ -104,12 +104,25 @@ class GenerarZipDocumentos implements ShouldQueue
             ->first();
 
         $archivosActuales = collect(File::allFiles($rutaBase))
-            ->reject(fn($file) => !$this->incluirUnicaVez && str_contains($file->getRealPath(), '/única_vez'))
+            ->when(!$this->incluirUnicaVez, fn($c) => $c->reject(fn($file) => str_contains($file->getRealPath(), '/única_vez')))
             ->mapWithKeys(function ($file) use ($relativaDesde) {
                 $path = $file->getRealPath();
                 $rel = substr($path, strlen($relativaDesde) + 1);
                 return [$rel => $file->getMTime()];
             });
+
+        if ($this->incluirUnicaVez && $this->cliente && $this->proveedor && $this->tipoDocumento !== 'repse') {
+            $rutaExtra = storage_path("app/public/documentos/{$this->admin}/{$this->cliente}/repse/{$this->proveedor}/única_vez");
+            if (File::exists($rutaExtra)) {
+                $archivosActuales = $archivosActuales->merge(
+                    collect(File::allFiles($rutaExtra))->mapWithKeys(function ($file) use ($relativaDesde) {
+                        $path = $file->getRealPath();
+                        $rel = substr($path, strlen($relativaDesde) + 1);
+                        return [$rel => $file->getMTime()];
+                    })
+                );
+            }
+        }
 
         $archivosZip = collect();
         if (File::exists($zipFinal)) {
@@ -162,6 +175,26 @@ class GenerarZipDocumentos implements ShouldQueue
 
                 $zip->addFile($filePath, $relativePath);
                 $archivosAgregados++;
+            }
+
+            if ($this->incluirUnicaVez && $this->cliente && $this->proveedor && $this->tipoDocumento !== 'repse') {
+                $rutaExtra = storage_path("app/public/documentos/{$this->admin}/{$this->cliente}/repse/{$this->proveedor}/única_vez");
+                if (File::exists($rutaExtra)) {
+                    $iteratorExtra = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($rutaExtra, FilesystemIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::LEAVES_ONLY
+                    );
+
+                    foreach ($iteratorExtra as $file) {
+                        if ($file->isDir()) continue;
+
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($relativaDesde) + 1);
+
+                        $zip->addFile($filePath, $relativePath);
+                        $archivosAgregados++;
+                    }
+                }
             }
 
             if ($archivosAgregados === 0) {

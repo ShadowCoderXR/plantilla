@@ -143,6 +143,11 @@
                             </select>
                         </div>
 
+                        <div class="form-check form-switch d-flex align-items-center mb-3">
+                            <input class="form-check-input me-2" type="checkbox" role="switch" id="switchUnicaVez" name="opcionunicavez" value="1">
+                            <label class="form-check-label small text-muted" for="switchUnicaVez">Incluir carpeta "única vez"</label>
+                        </div>
+
                         <div class="text-center">
                             <button type="submit" class="btn bg-gradient-primary w-100 rounded-2 shadow-sm" data-bs-dismiss="modal">
                                 <i class="fa fa-check me-2"></i> Confirmar
