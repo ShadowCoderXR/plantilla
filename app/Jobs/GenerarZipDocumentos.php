@@ -59,14 +59,6 @@ class GenerarZipDocumentos implements ShouldQueue
         $rutaBase = storage_path('app/public/' . implode('/', array_filter($baseRuta)));
         $relativaDesde = storage_path('app/public/documentos');
 
-        $rutaUnicaVezExtra = null;
-        if ($this->tipoDocumento !== 'repse' && $this->cliente && $this->proveedor) {
-            $rutaPosible = storage_path("app/public/documentos/{$this->admin}/{$this->cliente}/repse/{$this->proveedor}/única_vez");
-            if (File::exists($rutaPosible)) {
-                $rutaUnicaVezExtra = $rutaPosible;
-            }
-        }
-
         $directorioZips = storage_path("app/zips");
         $mesNombre = $this->tipo === 3 && $this->mes
             ? Util::slugify(strtolower(Carbon::create()->month($this->mes)->locale('es')->translatedFormat('F')))
@@ -108,7 +100,6 @@ class GenerarZipDocumentos implements ShouldQueue
             ->first();
 
         $archivosActuales = collect(File::allFiles($rutaBase))
-            ->merge($rutaUnicaVezExtra ? File::allFiles($rutaUnicaVezExtra) : [])
             ->mapWithKeys(function ($file) use ($relativaDesde) {
                 $path = $file->getRealPath();
                 $rel = substr($path, strlen($relativaDesde) + 1);
@@ -145,37 +136,26 @@ class GenerarZipDocumentos implements ShouldQueue
         }
 
         File::delete($zipFinal);
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
 
-        if ($zip->open($zipFinal, \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
+        if ($zip->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
             $archivosAgregados = 0;
-            $iteradores = [
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($rutaBase, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                )
-            ];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($rutaBase, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::LEAVES_ONLY
+            );
 
-            if ($rutaUnicaVezExtra) {
-                $iteradores[] = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($rutaUnicaVezExtra, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                );
-            }
+            foreach ($iterator as $file) {
+                if ($file->isDir()) continue;
 
-            foreach ($iteradores as $iterator) {
-                foreach ($iterator as $file) {
-                    if ($file->isDir()) continue;
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($relativaDesde) + 1);
 
-                    $filePath = $file->getRealPath();
-                    $relativePath = substr($filePath, strlen($relativaDesde) + 1);
+                if ($this->tipo === 2 && $this->anio && !str_contains($relativePath, "{$this->anio}/")) continue;
+                if ($this->tipo === 3 && $this->anio && $mesNombre && !str_contains($relativePath, "{$this->anio}/{$mesNombre}/")) continue;
 
-                    if ($this->tipo === 2 && $this->anio && !str_contains($relativePath, "{$this->anio}/")) continue;
-                    if ($this->tipo === 3 && $this->anio && $mesNombre && !str_contains($relativePath, "{$this->anio}/{$mesNombre}/")) continue;
-
-                    $zip->addFile($filePath, $relativePath);
-                    $archivosAgregados++;
-                }
+                $zip->addFile($filePath, $relativePath);
+                $archivosAgregados++;
             }
 
             if ($archivosAgregados === 0) {

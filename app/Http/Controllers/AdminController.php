@@ -202,6 +202,7 @@ class AdminController extends Controller
         $tipo   = (int) $request->input('tipo', 1);
         $anio   = $request->input('anio');
         $mes    = $request->input('mes');
+        $incluirUnicaVez = $request->filled('opcionunicavez');
 
         $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
 
@@ -267,7 +268,8 @@ class AdminController extends Controller
             $anio,
             $mes,
             $tipoSlug,
-            $proveedorSlug
+            $proveedorSlug,
+            $incluirUnicaVez,
         );
 
         return LogUsuarioService::logRespuesta([
