@@ -232,9 +232,17 @@ class AdminController extends Controller
             $adminSlug     = Util::slugify($administrador->nombre);
         }
 
-        $mesNombre = $tipo === 3 && $mes
-            ? Util::slugify(strtolower(Carbon::createFromDate(null, (int) $mes)->locale('es')->translatedFormat('F')))
-            : null;
+        $mesNombre = null;
+        if ($tipo === 3 && $mes) {
+            $mesNombre = Util::slugify(
+                strtolower(
+                    Carbon::create()
+                        ->month((int) $mes)
+                        ->locale('es')
+                        ->translatedFormat('F')
+                )
+            );
+        }
 
         $hashComponentes = implode('|', array_filter([
             $clienteSlug,
@@ -242,10 +250,12 @@ class AdminController extends Controller
             $proveedorSlug,
             $tipo === 2 ? $anio : null,
             $tipo === 3 ? ($anio . '-' . $mesNombre) : null,
-            $incluirUnicaVez ? 'incluirUnicaVez' : null,
+            $incluirUnicaVez ? 'unica_vez' : null,
         ]));
 
         $hash = substr(sha1($hashComponentes), 0, 8);
+
+        Log::info("[ZIP] Hash controller: {$hash}");
 
         $nombreZip = implode('-', array_filter([
                 $adminSlug,
@@ -317,15 +327,27 @@ class AdminController extends Controller
         ]);
     }
 
-    public function descargarZip($nombre)
+    public function descargarZip(string $nombre)
     {
+        $descarga = Descarga::where('nombre', $nombre)
+            ->where('usuario_id', auth()->id())
+            ->latest()
+            ->first();
+
+        if (! $descarga) {
+            return redirect()->back()->with('error', "No se encontró la descarga “{$nombre}”.");
+        }
+
         $ruta = storage_path("app/zips/{$nombre}.zip");
 
-        if (!File::exists($ruta)) abort(404);
+        if (! File::exists($ruta)) {
+            $descarga->update(['estado' => 'eliminado']);
+            return redirect()->back()->with('error', "El archivo ZIP “{$nombre}” ya no está disponible.");
+        }
 
         return LogUsuarioService::logRespuesta([
             'accion'      => LogUsuarioAccion::DESCARGAR_ZIP,
-            'descripcion' => "Descarga del ZIP: $nombre",
+            'descripcion' => "Descarga del ZIP: {$nombre}",
             'respuesta'   => response()->download($ruta),
         ]);
     }
