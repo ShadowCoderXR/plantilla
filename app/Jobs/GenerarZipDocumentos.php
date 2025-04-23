@@ -4,14 +4,11 @@ namespace App\Jobs;
 
 use App\Helpers\Util;
 use App\Models\Descarga;
-use FilesystemIterator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ZipArchive;
 
 class GenerarZipDocumentos implements ShouldQueue
@@ -55,8 +52,8 @@ class GenerarZipDocumentos implements ShouldQueue
     {
         Log::info("[ZIP] Iniciando job para usuario ID: {$this->usuarioId}");
 
-        $base = array_filter(['documentos', $this->admin, $this->cliente, $this->tipoDocumento, $this->proveedor]);
-        $rutaBase      = storage_path('app/public/' . implode('/', $base));
+        $segments      = array_filter(['documentos', $this->admin, $this->cliente, $this->tipoDocumento, $this->proveedor]);
+        $rutaBase      = storage_path('app/public/' . implode('/', $segments));
         $relativaDesde = storage_path('app/public/documentos');
         $directorioZips= storage_path('app/zips');
 
@@ -64,10 +61,7 @@ class GenerarZipDocumentos implements ShouldQueue
         if ($this->tipo === 3 && $this->mes) {
             $mesNombre = Util::slugify(
                 strtolower(
-                    Carbon::create()
-                        ->month($this->mes)
-                        ->locale('es')
-                        ->translatedFormat('F')
+                    Carbon::create()->month($this->mes)->locale('es')->translatedFormat('F')
                 )
             );
         }
@@ -81,16 +75,14 @@ class GenerarZipDocumentos implements ShouldQueue
             $this->incluirUnicaVez ? 'unica_vez' : null,
         ]);
         $hash = substr(sha1(implode('|', $hashParts)), 0, 8);
-        Log::info("[ZIP] Hash job: {$hash}");
 
-        $nameParts    = array_filter([
+        $nameParts = array_filter([
             $this->admin,
             $this->tipo === 2 ? (string)$this->anio : null,
             $this->tipo === 3 ? "{$this->anio}-{$mesNombre}" : null,
         ]);
         $nombreSinExt = implode('-', $nameParts) . '-' . $hash;
-
-        $zipFilename = $nombreSinExt . '.zip';
+        $zipFilename = "{$nombreSinExt}.zip";
         $zipFinal    = "{$directorioZips}/{$zipFilename}";
 
         $descarga = Descarga::where('usuario_id', $this->usuarioId)
@@ -104,38 +96,69 @@ class GenerarZipDocumentos implements ShouldQueue
             return;
         }
 
-        if (! File::exists($rutaBase)) {
-            $descarga->update(['estado' => 'error']);
-            return;
-        }
-
         if (! File::exists($directorioZips)) {
             File::makeDirectory($directorioZips, 0755, true);
         }
 
-        $coleccion = collect();
-
+        $todos = collect();
         if ($this->incluirUnicaVez) {
             $u1 = "{$rutaBase}/única_vez";
             if (File::exists($u1)) {
-                $coleccion = $coleccion->merge(File::allFiles($u1));
+                $todos = $todos->merge(File::allFiles($u1));
             }
             if ($this->cliente && $this->proveedor && $this->tipoDocumento !== 'repse') {
                 $u2 = storage_path("app/public/documentos/{$this->admin}/{$this->cliente}/repse/{$this->proveedor}/única_vez");
                 if (File::exists($u2)) {
-                    $coleccion = $coleccion->merge(File::allFiles($u2));
+                    $todos = $todos->merge(File::allFiles($u2));
                 }
             }
         }
+        if (File::exists($rutaBase)) {
+            $todos = $todos->merge(File::allFiles($rutaBase));
+        }
+        $filtrados = $todos->mapWithKeys(function($file) use ($relativaDesde) {
+            $rel = substr($file->getRealPath(), strlen($relativaDesde) + 1);
+            return [ $rel => $file->getMTime() ];
+        })
+            ->filter(function($mtime, $rel) use ($mesNombre) {
+                if ($this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
+                    return true;
+                }
+                if (! $this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
+                    return false;
+                }
+                if ($this->tipo === 2 && $this->anio && ! str_contains($rel, "{$this->anio}/")) {
+                    return false;
+                }
+                if ($this->tipo === 3 && $this->anio && $mesNombre && ! str_contains($rel, "{$this->anio}/{$mesNombre}/")) {
+                    return false;
+                }
+                return true;
+            });
 
-        $coleccion = $coleccion->merge(File::allFiles($rutaBase));
+        if (! File::exists($rutaBase) || $filtrados->isEmpty()) {
+            File::delete($zipFinal);
+            $zip = new ZipArchive();
+            if ($zip->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+                $tmp = storage_path('app/temp-mensaje.txt');
+                File::put($tmp, 'No hay archivos disponibles para los parámetros seleccionados.');
+                $zip->addFile($tmp, "{$this->admin}/mensaje.txt");
+                $zip->close();
+            }
+            $descarga->update([
+                'estado' => File::exists($zipFinal) ? 'completado' : 'error',
+                'tamaño' => File::size($zipFinal) ?: null,
+            ]);
+            Log::info("[ZIP] Zip de vacío creado: {$zipFinal}");
+            return;
+        }
+
+        $coleccion = $todos;
+
         Log::info("[ZIP] Total archivos recolectados: {$coleccion->count()}");
 
         $archivosActuales = $coleccion
-            ->mapWithKeys(function($file) use ($relativaDesde) {
-                $rel = substr($file->getRealPath(), strlen($relativaDesde) + 1);
-                return [$rel => $file->getMTime()];
-            })
+            ->mapWithKeys(fn($file) => [ substr($file->getRealPath(), strlen($relativaDesde) + 1) => $file->getMTime() ])
             ->filter(function($mtime, $rel) use ($mesNombre) {
                 if ($this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
                     return true;
@@ -155,13 +178,15 @@ class GenerarZipDocumentos implements ShouldQueue
 
         $zipOld = collect();
         if (File::exists($zipFinal)) {
-            $zip = new ZipArchive();
-            if ($zip->open($zipFinal) === true) {
-                for ($i=0; $i<$zip->numFiles; $i++) {
-                    $st = $zip->statIndex($i);
-                    if ($st) $zipOld[$st['name']] = $st['mtime'] ?? 0;
+            $zipReader = new ZipArchive();
+            if ($zipReader->open($zipFinal) === true) {
+                for ($i = 0; $i < $zipReader->numFiles; $i++) {
+                    $st = $zipReader->statIndex($i);
+                    if ($st) {
+                        $zipOld[$st['name']] = $st['mtime'] ?? 0;
+                    }
                 }
-                $zip->close();
+                $zipReader->close();
             }
         }
         $modificados = $archivosActuales->filter(fn($mt,$rp) => ! isset($zipOld[$rp]) || $zipOld[$rp] < $mt);
@@ -179,17 +204,12 @@ class GenerarZipDocumentos implements ShouldQueue
         }
 
         File::delete($zipFinal);
-        $zip = new ZipArchive();
-        if ($zip->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+        $zipWriter = new ZipArchive();
+        if ($zipWriter->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
             foreach ($archivosActuales as $rel => $_) {
-                $zip->addFile("{$relativaDesde}/{$rel}", $rel);
+                $zipWriter->addFile("{$relativaDesde}/{$rel}", $rel);
             }
-            if ($archivosActuales->isEmpty()) {
-                $tmp = storage_path('app/temp-mensaje.txt');
-                File::put($tmp, 'No hay archivos disponibles para los parámetros seleccionados.');
-                $zip->addFile($tmp, "{$this->admin}/mensaje.txt");
-            }
-            $zip->close();
+            $zipWriter->close();
         }
 
         $descarga->update([
