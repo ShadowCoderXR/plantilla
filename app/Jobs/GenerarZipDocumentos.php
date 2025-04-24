@@ -113,16 +113,16 @@ class GenerarZipDocumentos implements ShouldQueue
                 }
             }
         }
+
         if (File::exists($rutaBase)) {
             $todos = $todos->merge(File::allFiles($rutaBase));
         }
 
-        $coleccion = $todos;
-
-        Log::info("[ZIP] Total archivos recolectados: {$coleccion->count()}");
-
-        $archivosActuales = $coleccion
-            ->mapWithKeys(fn($file) => [ substr($file->getRealPath(), strlen($relativaDesde) + 1) => $file->getMTime() ])
+        $filtrados = $todos->mapWithKeys(function($file) use ($relativaDesde) {
+            $rel = substr($file->getRealPath(), strlen($relativaDesde) + 1);
+            $rel = str_replace(['\\','/'], '/', $rel);
+            return [ $rel => $file->getMTime() ];
+        })
             ->filter(function($mtime, $rel) use ($mesNombre) {
                 if ($this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
                     return true;
@@ -130,25 +130,58 @@ class GenerarZipDocumentos implements ShouldQueue
                 if (! $this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
                     return false;
                 }
-                if ($this->tipo === 2 && $this->anio && ! str_contains($rel, "{$this->anio}\\")) {
+                if ($this->tipo === 2 && $this->anio && ! str_contains($rel, "{$this->anio}/")) {
                     return false;
                 }
-                if ($this->tipo === 3 && $this->anio && $mesNombre && ! str_contains($rel, "{$this->anio}\\{$mesNombre}\\")) {
+                if ($this->tipo === 3 && $this->anio && $mesNombre && ! str_contains($rel, "{$this->anio}/{$mesNombre}/")) {
+                    return false;
+                }
+                return true;
+            });
+
+        if (! File::exists($rutaBase) || $filtrados->isEmpty()) {
+            File::delete($zipFinal);
+            $zip = new ZipArchive();
+            if ($zip->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+                $tmp = storage_path('app/temp-mensaje.txt');
+                File::put($tmp, 'No hay archivos disponibles para los parámetros seleccionados.');
+                $zip->addFile($tmp, "{$this->admin}/mensaje.txt");
+                $zip->close();
+            }
+            $descarga->update([
+                'estado' => File::exists($zipFinal) ? 'completado' : 'error',
+                'tamaño' => File::size($zipFinal) ?: null,
+            ]);
+            Log::info("[ZIP] Zip de vacío creado: {$zipFinal}");
+            return;
+        }
+
+        $coleccion = $todos;
+
+        Log::info("[ZIP] Total archivos recolectados: {$coleccion->count()}");
+
+        $archivosActuales = $coleccion
+            ->mapWithKeys(function($file) use ($relativaDesde) {
+                $rel = substr($file->getRealPath(), strlen($relativaDesde) + 1);
+                $rel = str_replace(['\\','/'], '/', $rel);
+                return [ $rel => $file->getMTime() ];
+            })
+            ->filter(function($mtime, $rel) use ($mesNombre) {
+                if ($this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
+                    return true;
+                }
+                if (! $this->incluirUnicaVez && str_contains($rel, 'única_vez')) {
+                    return false;
+                }
+                if ($this->tipo === 2 && $this->anio && ! str_contains($rel, "{$this->anio}/")) {
+                    return false;
+                }
+                if ($this->tipo === 3 && $this->anio && $mesNombre && ! str_contains($rel, "{$this->anio}/{$mesNombre}/")) {
                     return false;
                 }
                 return true;
             });
         Log::info("[ZIP] Archivos tras filtro: {$archivosActuales->count()}");
-
-        if ($archivosActuales->isEmpty()) {
-            Log::info("[ZIP] No hay documentos; marcando como sin_documentos y saliendo");
-            $descarga->update([
-                'estado'     => 'sin_documentos',
-                'tamaño'     => 0,
-                'updated_at' => now(),
-            ]);
-            return;
-        }
 
         $zipOld = collect();
         if (File::exists($zipFinal)) {
