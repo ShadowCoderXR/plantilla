@@ -6,10 +6,13 @@ class Util
 {
     public static function slugify(string $string): string
     {
-        return trim(preg_replace(
-            ['/[^a-z0-9_]/', '/_+/'],
-            ['_', '_'],
-            strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', str_replace(' ', '_', $string)))
-        ), '_');
+        $map = [
+            'Á'=>'A','É'=>'E','Í'=>'I','Ó'=>'O','Ú'=>'U',
+            'á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u',
+        ];
+        $string = strtr($string, $map);
+        $string = preg_replace('/[^A-Za-z0-9]+/', '_', $string);
+        $string = preg_replace('/_+/', '_', $string);
+        return strtolower(trim($string, '_'));
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
@@ -193,8 +194,8 @@ class DocumentoService
         $nombreFinal = $archivo->getClientOriginalName();
 
         $ruta = $documento->documento->informacion === 'Documento única vez'
-            ? "documentos/{$admin}/{$cliente}/{$tipoSlug}/{$proveedor}/única_vez/{$nombreNormalizado}"
-            : "documentos/{$admin}/{$cliente}/{$tipoSlug}/{$proveedor}/{$anio}/{$mes}/{$nombreNormalizado}";
+            ? "documentos/{$admin}/{$cliente}/{$proveedor}/{$tipoSlug}/única_vez/{$nombreNormalizado}"
+            : "documentos/{$admin}/{$cliente}/{$proveedor}/{$tipoSlug}/{$anio}/{$mes}/{$nombreNormalizado}";
 
         return [$ruta, $nombreFinal];
     }
