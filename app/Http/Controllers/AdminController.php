@@ -311,19 +311,27 @@ class AdminController extends Controller
     {
         $descarga = Descarga::where('nombre', $nombre)->latest()->first();
 
-        $respuesta = !$descarga
-            ? ['estado' => 'no_encontrado']
-            : [
-                'estado'  => $descarga->estado,
-                'ruta'    => $descarga->ruta,
-                'tamaño'  => $descarga->tamaño,
-                'listo'   => $descarga->estado === 'completado'
-            ];
+        if (! $descarga) {
+            return LogUsuarioService::logRespuesta([
+                'accion'      => LogUsuarioAccion::DESCARGAR_ZIP,
+                'descripcion' => "Consulta de progreso para ZIP: $nombre (no encontrado)",
+                'respuesta'   => response()->json(['estado' => 'no_encontrado']),
+            ]);
+        }
+
+        $finalizado = $descarga->estado !== 'en_proceso';
+
+        $payload = [
+            'estado'  => $descarga->estado,
+            'ruta'    => $descarga->ruta,
+            'tamaño'  => $descarga->tamaño,
+            'listo'   => $finalizado,
+        ];
 
         return LogUsuarioService::logRespuesta([
             'accion'      => LogUsuarioAccion::DESCARGAR_ZIP,
-            'descripcion' => "Consulta de progreso para ZIP: $nombre",
-            'respuesta'   => response()->json($respuesta),
+            'descripcion' => "Consulta de progreso para ZIP: {$descarga->nombre}",
+            'respuesta'   => response()->json($payload),
         ]);
     }
 
@@ -341,7 +349,7 @@ class AdminController extends Controller
         $ruta = storage_path("app/zips/{$nombre}.zip");
 
         if (! File::exists($ruta)) {
-            $descarga->update(['estado' => 'eliminado']);
+            $descarga->update(['estado' => 'eliminado', 'tamaño' => '0']);
             return redirect()->back()->with('error', "El archivo ZIP “{$nombre}” ya no está disponible.");
         }
 

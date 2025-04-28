@@ -37,10 +37,26 @@
                                             $descarga->estado === 'completado' ? 'success' :
                                             ($descarga->estado === 'en_proceso' ? 'warning' : 'danger')
                                         }}">
-                                            {{ ucfirst($descarga->estado) }}
+                                            {{ ucfirst(str_replace('_', ' ', $descarga->estado)) }}
                                         </span>
                                     </td>
-                                    <td class="text-sm">{{ $descarga->tamaño ? number_format($descarga->tamaño / 1024 / 1024, 2) . ' MB' : '—' }}</td>
+                                    <td class="text-sm">
+                                        @php
+                                            $size = $descarga->tamaño ?? 0;
+                                        @endphp
+
+                                        @if($size > 0)
+                                            @if($size < 1024)
+                                                {{ $size }} B
+                                            @elseif($size < 1024 * 1024)
+                                                {{ number_format($size / 1024, 2) }} KB
+                                            @else
+                                                {{ number_format($size / (1024 * 1024), 2) }} MB
+                                            @endif
+                                        @else
+                                            &mdash;
+                                        @endif
+                                    </td>
                                     <td class="text-sm">{{ $descarga->updated_at->format('d/m/Y H:i') }}</td>
                                     <td>
                                         @if($descarga->estado === 'completado')
@@ -83,22 +99,23 @@
                 let debeRecargar = false;
 
                 const promesas = Array.from(filas).map(fila => {
-                    const nombre = fila.dataset.nombre;
-                    const estadoBadge = fila.querySelector('td:nth-child(3) span');
+                    const nombre    = fila.dataset.nombre;
+                    const badge     = fila.querySelector('td:nth-child(3) span');
+                    const estadoTxt = badge?.textContent.trim().toLowerCase() ?? '';
 
-                    if (estadoBadge && estadoBadge.textContent.toLowerCase().includes('proceso')) {
+                    if (estadoTxt === 'en proceso' || estadoTxt === 'en_proceso') {
                         hayPendientes = true;
 
-                        return fetch(`/admin/documentos/zip-progreso/${nombre}`)
+                        return fetch(`/admin/documentos/zip-progreso/${encodeURIComponent(nombre)}`)
                             .then(res => res.json())
                             .then(data => {
                                 if (!data || data.estado === 'no_encontrado') return;
 
-                                if (data.estado === 'completado') {
+                                if (data.estado !== 'en_proceso') {
                                     debeRecargar = true;
                                 }
                             })
-                            .catch(error => console.error("Error actualizando progreso:", error));
+                            .catch(console.error);
                     }
 
                     return Promise.resolve();
