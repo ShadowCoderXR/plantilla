@@ -18,7 +18,7 @@
                             <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Información</th>
+                                <th>Descripción</th>
                                 <th>Estado</th>
                                 <th>Tamaño</th>
                                 <th>Fecha</th>
@@ -30,7 +30,7 @@
                                 <tr data-nombre="{{ $descarga->nombre }}">
                                     <td class="text-sm">{{ $descarga->nombre }}</td>
                                     <td class="text-sm text-wrap" style="max-width: 250px; word-break: break-word;">
-                                        {{ $descarga->informacion ?? '—' }}
+                                        {{ $descarga->descripcion ?? '—' }}
                                     </td>
                                     <td>
                                         <span class="badge bg-gradient-{{

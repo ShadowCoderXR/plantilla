@@ -185,7 +185,8 @@ class GenerarZipDocumentos implements ShouldQueue
         $zipWriter = new ZipArchive();
         if ($zipWriter->open($zipFinal, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
             foreach ($archivosActuales as $rel => $_) {
-                $zipWriter->addFile("{$relativaDesde}/{$rel}", $rel);
+                $rutaCompleta = "{$relativaDesde}/{$rel}";
+                $zipWriter->addFile($rutaCompleta, $rel);
             }
             $zipWriter->close();
         }

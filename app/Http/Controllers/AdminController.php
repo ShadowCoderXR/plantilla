@@ -205,7 +205,7 @@ class AdminController extends Controller
         $incluirUnicaVez = $request->filled('opcionunicavez');
 
         $adminSlug = $clienteSlug = $proveedorSlug = $tipoSlug = null;
-        $descripcionInfo = "Origen: " . ucfirst($origen);
+        $descripcionInfo = '';
 
         if ($origen === 'proveedor') {
             $administrador = Administrador::findOrFail($request->administrador_id);
@@ -218,7 +218,14 @@ class AdminController extends Controller
             $proveedorSlug = Util::slugify($proveedor->nombre);
             $tipoSlug      = Util::slugify($tipoDocumento->nombre);
 
-            $descripcionInfo .= " | Cliente: {$cliente->nombre} | Proveedor: {$proveedor->nombre} | Documento: {$tipoDocumento->nombre}";
+            $descripcionInfo .= " Cliente: {$cliente->nombre} | Proveedor: {$proveedor->nombre} | Documento: {$tipoDocumento->nombre}";
+
+            if ($tipo === 2 && $anio) {
+                $descripcionInfo .= " | Año: {$anio}";
+            }
+            if ($tipo === 3 && $anio && $mes) {
+                $descripcionInfo .= " | Año: {$anio} | " . "Mes: " . Carbon::create()->month((int) $mes)->locale('es')->translatedFormat('F');
+            }
         } elseif ($origen === 'cliente') {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $cliente       = Cliente::findOrFail($request->cliente_id);
@@ -226,10 +233,29 @@ class AdminController extends Controller
             $adminSlug   = Util::slugify($administrador->nombre);
             $clienteSlug = Util::slugify($cliente->nombre);
 
-            $descripcionInfo .= " | Cliente: {$cliente->nombre}";
+            $descripcionInfo .= " Cliente: {$cliente->nombre}";
+
+            if ($tipo === 2 && $anio) {
+                $descripcionInfo .= " | Año: {$anio}";
+            }
+            if ($tipo === 3 && $anio && $mes) {
+                $descripcionInfo .= " | Año: {$anio} | " . "Mes: " . Carbon::create()->month((int) $mes)->locale('es')->translatedFormat('F');
+            }
         } else {
             $administrador = Administrador::findOrFail($request->administrador_id);
             $adminSlug     = Util::slugify($administrador->nombre);
+
+            if ($tipo === 1) {
+                $descripcionInfo = "Toda la documentación";
+            } elseif ($tipo === 2 && $anio) {
+                $descripcionInfo = "Año: {$anio}";
+            } elseif ($tipo === 3 && $anio && $mes) {
+                $descripcionInfo = "Año: {$anio} | " . "Mes: " . Carbon::create()->month((int) $mes)->locale('es')->translatedFormat('F');
+            }
+        }
+
+        if ($incluirUnicaVez) {
+            $descripcionInfo .= " | Incluye 'única_vez'";
         }
 
         $mesNombre = null;
@@ -265,13 +291,9 @@ class AdminController extends Controller
 
         $zipFinal = storage_path("app/zips/{$nombreZip}.zip");
 
-        if ($incluirUnicaVez) {
-            $descripcionInfo .= " | Incluye 'única_vez'";
-        }
-
         Descarga::updateOrCreate(
             ['usuario_id' => auth()->id(), 'nombre' => $nombreZip, 'ruta' => $zipFinal],
-            ['estado' => 'en_proceso', 'informacion' => $descripcionInfo]
+            ['estado' => 'en_proceso', 'descripcion' => $descripcionInfo]
         );
 
         GenerarZipDocumentos::dispatch(
